@@ -1,0 +1,14 @@
+[project]
+name = "simpli"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+authors = [
+    { name = "Plummy", email = "plummybeatsoff@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = []
+
+[build-system]
+requires = ["uv_build>=0.10.1,<0.11.0"]
+build-backend = "uv_build"

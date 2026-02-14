@@ -1,0 +1,101 @@
+from abc import ABC, abstractmethod
+from typing import Type, TYPE_CHECKING, Any, Iterable, TypeVar, overload
+
+from simpli.components import Component
+from simpli.entities import Entity, AbstractEntity
+from simpli.utils import Holder, AppDependant
+
+if TYPE_CHECKING:
+    from simpli import Simpli
+else:
+    Simpli = Any
+
+_CT = TypeVar("_CT", bound=Component)
+AET = TypeVar("AET", bound=AbstractEntity)
+_ET = TypeVar("_ET", bound=Entity)
+
+
+class AbstractEntityHolder(AppDependant, ABC):
+    @overload
+    def new(self, *args: Any, **kwargs: Any) -> AbstractEntity: ...
+
+    @overload
+    def new(self, entity_type: Type[AET], *args: Any, **kwargs: Any) -> None: ...
+
+    @abstractmethod
+    def new(self, entity_type: Type[AET] | None = None, *args: Any, **kwargs: Any) -> AET:
+        raise NotImplementedError
+
+    @abstractmethod
+    def remove(self, identifier: int) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def __getitem__(self, identifier: int) -> AbstractEntity:
+        raise NotImplementedError
+
+    @abstractmethod
+    def __contains__(self, identifier: int) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    def __len__(self) -> int:
+        raise NotImplementedError
+
+    @abstractmethod
+    def __iter__(self) -> Iterable[AbstractEntity]:
+        raise NotImplementedError
+
+    @abstractmethod
+    def by_components(self, *component_types: Type[_CT]) -> Iterable[AbstractEntity]:
+        raise NotImplementedError
+
+
+class EntityHolder(AbstractEntityHolder):
+    def __init__(self, app: Simpli, **kwargs: Any) -> None:
+        super().__init__(app=app, **kwargs)
+
+        self._entities: Holder[Entity] = Holder()
+
+    def new(
+            self,
+            entity_type: Type[_ET] | None = None,
+            *args: Any,
+            **kwargs: Any
+    ) -> _ET:
+        if entity_type is None:
+            entity_type = Entity
+
+        entity: _ET = entity_type(app=self.app, *args, **kwargs)
+        self._entities.add(entity)
+
+        return entity
+
+    def remove(self, identifier: int) -> Entity:
+        entity: Entity = self[identifier]
+
+        for child in entity.children:
+            self.remove(child.identifier)
+
+        if entity.parent is not None:
+            entity.parent.remove_child(entity.identifier)
+
+        return self._entities.remove(identifier)
+
+    def __getitem__(self, identifier: int) -> Entity:
+        try:
+            return self._entities[identifier]
+        except KeyError:
+            raise KeyError(f"Entity \"{identifier}\" is not in holder")
+
+    def __contains__(self, identifier: int) -> bool:
+        return identifier in self._entities
+
+    def __len__(self) -> int:
+        return len(self._entities)
+
+    def __iter__(self) -> Iterable[Entity]:
+        return self._entities.__iter__()
+
+    def by_components(self, *component_types: Type[_CT]) -> Iterable[Entity]:
+        return filter(lambda e: e.components.has_all(*component_types), self._entities.__iter__())

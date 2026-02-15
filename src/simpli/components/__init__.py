@@ -26,20 +26,22 @@ class VelocityComponent(Component):
 
 @dataclass(kw_only=True, slots=True)
 class AirFrictionComponent(Component):
-    air_friction: float = 0.985
+    air_friction: float = 0.035
 
     @classmethod
     def tag(cls) -> str:
         return "air_friction"
 
 
-@dataclass(kw_only=True, slots=True)
-class GravityComponent(Component):
-    gravity: Vector = Vector(0, -0.25)
+@dataclass
+class RepulsionComponent(Component):
+    repulsion_strength: float = 1
+    repulsion_range: float = 50
+    repulsion_power_factor: float = 1
 
     @classmethod
     def tag(cls) -> str:
-        return "gravity"
+        return "repulsion"
 
 
 @dataclass(kw_only=True, slots=True)
@@ -67,6 +69,6 @@ __all__ = [
     PositionComponent,
     VelocityComponent,
     AirFrictionComponent,
-    GravityComponent,
+    RepulsionComponent,
     ShapeComponent,
 ]

@@ -17,7 +17,7 @@ _CT = TypeVar("_CT", bound=Component)
 
 class AbstractComponentHolder(AppDependant, EntityDependant, ABC):
     @abstractmethod
-    def add(self, component_type: Type[_CT], *args: Any, **kwargs: Any) -> _CT: ...
+    def add(self, component_type: Type[_CT], **kwargs: Any) -> _CT: ...
 
     @abstractmethod
     def get(self, component_type: Type[_CT]) -> _CT:
@@ -55,8 +55,8 @@ class ComponentHolder(AbstractComponentHolder):
         super().__init__(app=app, entity=entity)
         self._components: Dict[str, Component] = {}
 
-    def add(self, component_type: Type[_CT], *args: Any, **kwargs: Any) -> _CT:
-        component: _CT = component_type(_app=self.app, _entity=self.entity, *args, **kwargs)
+    def add(self, component_type: Type[_CT], **kwargs: Any) -> _CT:
+        component: _CT = component_type(_app=self.app, _entity=self.entity, **kwargs)
         self._components[component_type.tag()] = component
         return component
 

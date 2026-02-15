@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Type, TYPE_CHECKING, Any, Iterable, TypeVar, overload
 
-from simpli.components import Component
+from simpli.components import Component, PositionComponent
 from simpli.entities import Entity, AbstractEntity
 from simpli.interfaces import AppDependant
-from simpli.utils import Holder
+from simpli.utils import Holder, Vector
 
 if TYPE_CHECKING:
     from simpli import Simpli
@@ -51,6 +51,10 @@ class AbstractEntityHolder(AppDependant, ABC):
     def by_components(self, *component_types: Type[_CT]) -> Iterable[AbstractEntity]:
         raise NotImplementedError
 
+    @abstractmethod
+    def nearby(self, position: Vector, radius: float, *component_types: Type[_CT]) -> Iterable[AbstractEntity]:
+        raise NotImplementedError
+
     def __init__(self, *, app: Simpli) -> None:
         self._app: Simpli = app
 
@@ -62,7 +66,7 @@ class AbstractEntityHolder(AppDependant, ABC):
 class EntityHolder(AbstractEntityHolder):
     def __init__(self, *, app: Simpli) -> None:
         super().__init__(app=app)
-        self._entities: Holder[Entity] = Holder()
+        self._entities: Holder[Entity] = Holder[Entity]()
 
     def new(self, entity_type: Type[_ET] | None = None, *args: Any, **kwargs: Any) -> _ET:
         if entity_type is None:
@@ -100,4 +104,11 @@ class EntityHolder(AbstractEntityHolder):
         return self._entities.__iter__()
 
     def by_components(self, *component_types: Type[_CT]) -> Iterable[Entity]:
-        return filter(lambda e: e.components.has_all(*component_types), self._entities.__iter__())
+        for entity in self._entities:
+            if entity.components.has_all(*component_types):
+                yield entity
+
+    def nearby(self, position: Vector, radius: float, *component_types: Type[_CT]) -> Iterable[Entity]:
+        for entity in self.by_components(PositionComponent, *component_types):
+            if (entity.components.get(PositionComponent).position - position).length < radius:
+                yield entity

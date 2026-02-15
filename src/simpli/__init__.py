@@ -2,17 +2,18 @@ from typing import Never, Any
 
 from pyglet.app import run
 from pyglet.gl import Config, glClearColor
-from pyglet.graphics import Batch
+from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import ShaderProgram, Shader
 from pyglet.window import Window
 
+from simpli.enums import MouseButton, LayerGroup
 from simpli.components import PositionComponent, VelocityComponent, AirFrictionComponent, ShapeComponent
 from simpli.entities import AbstractEntityHolder, EntityHolder, Entity, AbstractEntity
 from simpli.internal import Shaders
 from simpli.shapes import Circle
 from simpli.shapes import ShapeHolder, AbstractShapeHolder
 from simpli.systems import AbstractSystemHolder, SystemHolder, TickSystem, VelocitySystem, AirFrictionSystem, \
-    ShapeUpdateSystem, GravitySystem
+    ShapeUpdateSystem, RepulsionSystem
 from simpli.utils import Color, Vector
 
 
@@ -42,6 +43,7 @@ class Simpli:
         glClearColor(*self._window_background_color.as_tuple)
 
         self._batch = Batch()
+        self._groups = {layer_group: layer_group.value for layer_group in LayerGroup}
 
         self._program = ShaderProgram(
             Shader(Shaders.VERTEX_SHADER, "vertex"),
@@ -57,13 +59,16 @@ class Simpli:
         self._shapes: AbstractShapeHolder = ShapeHolder(app=self)
 
         self._systems.add(
-            ShapeUpdateSystem,
             VelocitySystem,
             AirFrictionSystem,
-            GravitySystem,
+            RepulsionSystem,
+            ShapeUpdateSystem,
         )
 
         self._window.set_handler("on_draw", self._tick)
+        self._window.set_handler("on_mouse_press", self._mouse_click)
+
+        self.on_startup()
 
     @property
     def title(self) -> str:
@@ -112,7 +117,25 @@ class Simpli:
     def run(self) -> Never:
         run()  # More logic upcoming, method won't be static
 
+    def group(self, layer_group: LayerGroup | None = None) -> Group:
+        return Group(self._groups.get(layer_group, LayerGroup.GEOMETRY))
+
+    def on_startup(self) -> None:
+        pass
+
+    def on_tick(self) -> None:
+        pass
+
+    def on_mouse_click(
+            self,
+            position: Vector,
+            button: MouseButton,
+    ) -> None:
+        pass
+
     def _tick(self) -> None:
+        self.on_tick()
+
         self._window.clear()
 
         for system in self._systems.by_system(TickSystem):
@@ -127,6 +150,23 @@ class Simpli:
         self._layout_program["u_zoom"] = 1
 
         self._batch.draw()
+
+    def _mouse_click(
+            self,
+            x: int,
+            y: int,
+            button: int,
+            modifiers: int,
+    ) -> None:
+        try:
+            button: MouseButton = MouseButton(button)
+        except ValueError:
+            return
+
+        self.on_mouse_click(
+            Vector(x, y),
+            button,
+        )
 
 
 __all__ = [

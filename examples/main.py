@@ -1,18 +1,16 @@
-from typing import Any
+from random import random
 
-from simpli import Simpli, Vector, Color, VelocityComponent
-from simpli.components import GravityComponent, AirFrictionComponent
-from simpli.entities import CircleEntity
+from simpli import Simpli, Vector, MouseButton, Color
+from simpli.entities import RepulsiveCircleEntity
 
 
 class MyApp(Simpli):
-    def __init__(self, **window_kwargs: Any):
-        super().__init__(**window_kwargs)
-
-        a = self.entities.new(CircleEntity, Vector(100, 0), 10, Color.random_bright())
-        a.components.add(VelocityComponent, velocity=Vector(-10, 0))
-        a.components.add(AirFrictionComponent)
-        a.components.add(GravityComponent)
+    def on_mouse_click(
+            self,
+            position: Vector,
+            button: MouseButton,
+    ) -> None:
+        self.entities.new(RepulsiveCircleEntity, position + Vector(-640, -360), random() * 100 + 10, Color.random_dark())
 
 
 MyApp().run()

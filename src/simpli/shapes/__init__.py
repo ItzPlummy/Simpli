@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from math import sqrt
 from typing import TypeVar, Callable, TypeAlias
 
+from pyglet.graphics import Group
 from pyglet.shapes import Circle as CircleBase
 
 from simpli.utils import Vector, Color
@@ -40,6 +41,7 @@ class Circle(Shape):
             self.segments,
             self.color.as_int_tuple,
             batch=self.app.batch,
+            group=Group(self.layer_group),
             program=self.app.program,
         )
 
@@ -56,6 +58,7 @@ class Circle(Shape):
             self._previous_radius = self.radius
 
     def _update_values(self) -> None:
+        self.layer_group = self.layer_group_getter()
         self.position = self.position_getter()
         self.radius = self.radius_getter()
         self.color = self.color_getter()

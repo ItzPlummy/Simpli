@@ -96,7 +96,7 @@ class Holder(AbstractHolder, Generic[_IT]):
     def __len__(self) -> int:
         return len(self._items)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[_IT]:
         self._current_iterations += 1
 
         try:

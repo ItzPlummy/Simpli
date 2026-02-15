@@ -39,7 +39,7 @@ class Color:
     def random_dark(cls) -> Self:
         color: Self = cls.random()
 
-        return cls(color.red // 2, color.green // 2, color.blue // 2)
+        return cls(color.red / 2, color.green / 2, color.blue / 2)
 
     @classmethod
     def black(cls) -> Self:

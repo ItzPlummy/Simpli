@@ -30,9 +30,9 @@ class EntityDependant(ABC):
 
 
 class Identifiable(ABC):
-    def __init__(self, *, identifier: int | None = None, **kwargs: Any) -> None:
+    def __init__(self, **kwargs: Any) -> None:
         super().__init__(**kwargs)
-        self._identifier: int | None = identifier
+        self._identifier: int | None = None
 
     @property
     def identifier(self) -> int:

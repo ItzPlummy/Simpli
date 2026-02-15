@@ -7,8 +7,8 @@ from ._component_holder import AbstractComponentHolder, ComponentHolder
 
 
 class ShapeComponent(Component):
-    def __component_init__(self, shape: Type[Shape], *args: Any, **kwargs: Any) -> None:
-        self.shape = shape(app=self.app, entity=self.entity, *args, **kwargs)
+    def __component_init__(self, shape: Type[Shape], **kwargs: Any) -> None:
+        self.shape = shape(app=self.app, entity=self.entity, **kwargs)
 
     @classmethod
     def tag(cls) -> str:

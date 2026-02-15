@@ -11,7 +11,7 @@ else:
     Simpli = Any
 
 _CT = TypeVar("_CT", bound=Component)
-AET = TypeVar("AET", bound=AbstractEntity)
+_AET = TypeVar("_AET", bound=AbstractEntity)
 _ET = TypeVar("_ET", bound=Entity)
 
 
@@ -20,10 +20,10 @@ class AbstractEntityHolder(AppDependant, ABC):
     def new(self, *args: Any, **kwargs: Any) -> AbstractEntity: ...
 
     @overload
-    def new(self, entity_type: Type[AET], *args: Any, **kwargs: Any) -> None: ...
+    def new(self, entity_type: Type[_AET], *args: Any, **kwargs: Any) -> None: ...
 
     @abstractmethod
-    def new(self, entity_type: Type[AET] | None = None, *args: Any, **kwargs: Any) -> AET:
+    def new(self, entity_type: Type[_AET] | None = None, *args: Any, **kwargs: Any) -> _AET:
         raise NotImplementedError
 
     @abstractmethod

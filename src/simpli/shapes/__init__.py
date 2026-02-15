@@ -27,9 +27,8 @@ class Circle(Shape):
             position_getter: _EntityAttributeGetter[Vector],
             radius_getter: _EntityAttributeGetter[float],
             color_getter: _EntityAttributeGetter[Color],
-            identifier: int | None = None,
     ) -> None:
-        super().__init__(app=app, entity=entity, identifier=identifier)
+        super().__init__(app=app, entity=entity)
 
         self._position_getter = position_getter
         self._radius_getter = radius_getter

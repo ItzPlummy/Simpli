@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING, Any, Sequence, Tuple, Type, Dict
 
-from ._entity import AbstractEntity, Entity
-from ._entity_holder import AbstractEntityHolder, EntityHolder
 from simpli.components import Component, PositionComponent, CircleComponent, ShapeComponent, VelocityComponent, \
     AirFrictionComponent, RepulsionComponent
-from simpli.utils import Vector, Color, Value
-from simpli.shapes import Circle
 from simpli.enums import LayerGroup
+from simpli.shapes import Circle
+from simpli.utils import Vector, Color, Value
+from ._entity import AbstractEntity, Entity
+from ._entity_holder import AbstractEntityHolder, EntityHolder
 
 if TYPE_CHECKING:
     from simpli import Simpli
@@ -24,45 +24,46 @@ class CircleEntity(Entity):
             app: Simpli,
             name: str | None = None,
             parent: AbstractEntity | None = None,
-            children: Sequence[AbstractEntity] | None = None,
             components: Sequence[Tuple[Type[Component], Dict[str, Any]]] | None = None,
     ) -> None:
         super().__init__(
             app=app,
             name=name,
             parent=parent,
-            children=[
-                app.entities.new(
-                    name="main_circle",
-                    components=[
-                        (ShapeComponent, {"shape": app.shapes.new(
-                            Circle,
-                            layer_group_getter=lambda: LayerGroup.GEOMETRY,
-                            position_getter=lambda: self.components.get(PositionComponent).position,
-                            radius_getter=lambda: self.components.get(CircleComponent).radius,
-                            color_getter=lambda: self.components.get(CircleComponent).color,
-                        )})
-                    ],
-                ),
-                app.entities.new(
-                    name="shadow_circle",
-                    components=[
-                        (ShapeComponent, {"shape": app.shapes.new(
-                            Circle,
-                            layer_group_getter=lambda: LayerGroup.BACKGROUND,
-                            position_getter=lambda: self.components.get(PositionComponent).position + Vector(5, -5),
-                            radius_getter=lambda: self.components.get(CircleComponent).radius,
-                            color_getter=Color.shadow,
-                        )})
-                    ],
-                ),
-                *(children or []),
-            ],
             components=[
                 (PositionComponent, {"position": position}),
                 (CircleComponent, {"radius": radius, "color": color}),
                 *(components or []),
             ],
+        )
+
+        self.set_child(
+            app.entities.new(
+                name="main_circle",
+                components=[
+                    (ShapeComponent, {"shape": app.shapes.new(
+                        Circle,
+                        position=Value(lambda: self.components.get(PositionComponent).position),
+                        radius=Value(lambda: self.components.get(CircleComponent).radius),
+                        color=Value(lambda: self.components.get(CircleComponent).color),
+                    )})
+                ],
+            ),
+        )
+
+        self.set_child(
+            app.entities.new(
+                name="shadow_circle",
+                components=[
+                    (ShapeComponent, {"shape": app.shapes.new(
+                        Circle,
+                        layer_group=LayerGroup.BACKGROUND,
+                        position=Value(lambda: self.components.get(PositionComponent).position + Vector(5, -5)),
+                        radius=Value(lambda: self.components.get(CircleComponent).radius),
+                        color=Color.shadow(),
+                    )})
+                ],
+            ),
         )
 
 
@@ -78,7 +79,6 @@ class RepulsiveCircleEntity(CircleEntity):
             app: Simpli,
             name: str | None = None,
             parent: AbstractEntity | None = None,
-            children: Sequence[AbstractEntity] | None = None,
             components: Sequence[Tuple[Type[Component], Dict[str, Any]]] | None = None,
     ) -> None:
         super().__init__(
@@ -88,7 +88,6 @@ class RepulsiveCircleEntity(CircleEntity):
             app=app,
             name=name,
             parent=parent,
-            children=children or [],
             components=[
                 (VelocityComponent, {"velocity": initial_velocity}),
                 (AirFrictionComponent, {}),

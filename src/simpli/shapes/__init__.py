@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from math import sqrt
 from typing import TypeVar, Callable, TypeAlias
 
 from pyglet.graphics import Group
@@ -15,10 +14,6 @@ _EntityAttributeGetter: TypeAlias = Callable[[], _T]
 
 @dataclass(kw_only=True, slots=True)
 class Circle(Shape):
-    position_getter: _EntityAttributeGetter[Vector]
-    radius_getter: _EntityAttributeGetter[float]
-    color_getter: _EntityAttributeGetter[Color]
-
     position: Vector = Vector.zero()
     radius: float = 0
     color: Color = Color.black()
@@ -31,7 +26,7 @@ class Circle(Shape):
 
     @property
     def segments(self) -> int:
-        return int(sqrt(self.radius) * 7.5) + 5
+        return int(self.radius ** 0.5 * 7.5) + 5
 
     def create(self) -> CircleBase:
         return CircleBase(
@@ -46,8 +41,6 @@ class Circle(Shape):
         )
 
     def update(self) -> None:
-        self._update_values()
-
         if self.radius == self._previous_radius:
             self._circle.x = self.position.x
             self._circle.y = self.position.y
@@ -56,12 +49,6 @@ class Circle(Shape):
             self.remove()
             self._circle = self.create()
             self._previous_radius = self.radius
-
-    def _update_values(self) -> None:
-        self.layer_group = self.layer_group_getter()
-        self.position = self.position_getter()
-        self.radius = self.radius_getter()
-        self.color = self.color_getter()
 
     def remove(self) -> None:
         self._circle.delete()

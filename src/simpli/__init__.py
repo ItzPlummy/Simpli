@@ -6,9 +6,9 @@ from pyglet.graphics import Batch, Group
 from pyglet.graphics.shader import ShaderProgram, Shader
 from pyglet.window import Window
 
-from simpli.enums import MouseButton, LayerGroup
 from simpli.components import PositionComponent, VelocityComponent, AirFrictionComponent, ShapeComponent
 from simpli.entities import AbstractEntityHolder, EntityHolder, Entity, AbstractEntity
+from simpli.enums import MouseButton, LayerGroup
 from simpli.internal import Shaders
 from simpli.shapes import Circle
 from simpli.shapes import ShapeHolder, AbstractShapeHolder

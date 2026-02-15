@@ -10,7 +10,7 @@ class MyApp(Simpli):
             position: Vector,
             button: MouseButton,
     ) -> None:
-        self.entities.new(RepulsiveCircleEntity, position + Vector(-640, -360), random() * 100 + 10, Color.random_dark())
+        self.entities.new(RepulsiveCircleEntity, position + Vector(-640, -360), 50, Color.random_bright())
 
 
 MyApp().run()

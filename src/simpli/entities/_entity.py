@@ -86,7 +86,6 @@ class Entity(AbstractEntity):
             app: Simpli,
             name: str | None = None,
             parent: AbstractEntity | None = None,
-            children: Sequence[AbstractEntity] | None = None,
             components: Sequence[Tuple[Type[Component], Dict[str, Any]]] | None = None,
     ) -> None:
         super().__init__(app=app)
@@ -95,10 +94,6 @@ class Entity(AbstractEntity):
         self._parent: AbstractEntity | None = parent
         self._children: AbstractIdentifierHolder = IdentifierHolder()
         self._components: AbstractComponentHolder = ComponentHolder(app=app, entity=self)
-
-        if children:
-            for child in children:
-                self.set_child(child)
 
         if components:
             for component_type, kwargs in components:

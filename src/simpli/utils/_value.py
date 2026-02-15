@@ -14,14 +14,13 @@ else:
             else:
                 self._v: Callable[[], _T] = lambda: value
 
-        @property
-        def value(self) -> _T:
-            try:
-                return self._v()
-            except TypeError:
-                raise ValueError("Callable must not accept args")
-
         def __getattr__(self, name: str) -> Any:
+            if name == "value":
+                try:
+                    return self._v()
+                except TypeError:
+                    raise ValueError("Callable must not accept args")
+
             return getattr(self.value, name)
 
         def __getitem__(self, key: Any) -> Any:

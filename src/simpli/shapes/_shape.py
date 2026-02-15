@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, TYPE_CHECKING, TypeAlias, Callable, TypeVar
 
-from simpli.interfaces import AppDependant, Identifiable
 from simpli.enums import LayerGroup
+from simpli.interfaces import AppDependant, Identifiable
 
 if TYPE_CHECKING:
     from simpli import Simpli
@@ -19,7 +19,6 @@ class Shape(AppDependant, Identifiable, ABC):
     _app: Simpli
     _identifier: int | None = None
 
-    layer_group_getter: _EntityAttributeGetter[LayerGroup]
     layer_group: LayerGroup = LayerGroup.GEOMETRY
 
     @abstractmethod

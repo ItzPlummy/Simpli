@@ -1,70 +1,44 @@
+from dataclasses import dataclass
 from math import sqrt
-from typing import TypeVar, Any, TYPE_CHECKING, Callable, TypeAlias
+from typing import TypeVar, Callable, TypeAlias
 
 from pyglet.shapes import Circle as CircleBase
 
 from simpli.utils import Vector, Color
-from ._base import Shape
-
-if TYPE_CHECKING:
-    from simpli import Simpli
-    from simpli.entities import AbstractEntity
-else:
-    Simpli = Any
-    AbstractEntity = Any
-
+from ._shape import Shape
+from ._shape_holder import AbstractShapeHolder, ShapeHolder
 
 _T = TypeVar('_T', bound=object)
-_EntityAttributeGetter: TypeAlias = Callable[[AbstractEntity], _T]
+_EntityAttributeGetter: TypeAlias = Callable[[], _T]
 
 
+@dataclass(kw_only=True, slots=True)
 class Circle(Shape):
-    def __init__(
-            self,
-            *,
-            app: Simpli,
-            entity: AbstractEntity,
-            position_getter: _EntityAttributeGetter[Vector],
-            radius_getter: _EntityAttributeGetter[float],
-            color_getter: _EntityAttributeGetter[Color],
-    ) -> None:
-        super().__init__(app=app, entity=entity)
+    position_getter: _EntityAttributeGetter[Vector]
+    radius_getter: _EntityAttributeGetter[float]
+    color_getter: _EntityAttributeGetter[Color]
 
-        self._position_getter = position_getter
-        self._radius_getter = radius_getter
-        self._color_getter = color_getter
+    position: Vector = Vector.zero()
+    radius: float = 0
+    color: Color = Color.black()
 
-        self._position: Vector
-        self._radius: float
-        self._color: Color
+    _circle: CircleBase = None
+    _previous_radius: float = 0
 
-        self._update_values()
+    def __post_init__(self) -> None:
         self._circle: CircleBase = self.create()
-        self._previous_radius: float = self._radius
-
-    @property
-    def position(self) -> Vector:
-        return self._position
-
-    @property
-    def radius(self) -> float:
-        return self._radius
 
     @property
     def segments(self) -> int:
-        return int(sqrt(self._radius) * 7.5) + 5
-
-    @property
-    def color(self) -> Color:
-        return self._color
+        return int(sqrt(self.radius) * 7.5) + 5
 
     def create(self) -> CircleBase:
         return CircleBase(
-            self._position.x,
-            self._position.y,
-            self._radius,
+            self.position.x,
+            self.position.y,
+            self.radius,
             self.segments,
-            self._color.as_int_tuple,
+            self.color.as_int_tuple,
             batch=self.app.batch,
             program=self.app.program,
         )
@@ -72,20 +46,19 @@ class Circle(Shape):
     def update(self) -> None:
         self._update_values()
 
-        if self._radius == self._previous_radius:
-            self._circle.x = self._position.x
-            self._circle.y = self._position.y
-            self._circle.color = self._color.as_int_tuple
+        if self.radius == self._previous_radius:
+            self._circle.x = self.position.x
+            self._circle.y = self.position.y
+            self._circle.color = self.color.as_int_tuple
         else:
             self.remove()
             self._circle = self.create()
-
-        self._previous_radius = self._radius
+            self._previous_radius = self.radius
 
     def _update_values(self) -> None:
-        self._position = self._position_getter(self.entity)
-        self._radius = self._radius_getter(self.entity)
-        self._color = self._color_getter(self.entity)
+        self.position = self.position_getter()
+        self.radius = self.radius_getter()
+        self.color = self.color_getter()
 
     def remove(self) -> None:
         self._circle.delete()
@@ -93,5 +66,7 @@ class Circle(Shape):
 
 __all__ = [
     Shape,
+    AbstractShapeHolder,
+    ShapeHolder,
     Circle,
 ]

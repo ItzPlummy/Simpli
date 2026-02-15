@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Dict, TYPE_CHECKING, Any, TypeVar, Type
 
-from simpli.utils import AppDependant, EntityDependant
 from ._component import Component
+from ..interfaces import AppDependant, EntityDependant
 
 if TYPE_CHECKING:
     from simpli import Simpli
@@ -31,6 +31,18 @@ class AbstractComponentHolder(AppDependant, EntityDependant, ABC):
     def remove(self, component_type: Type[_CT]) -> None:
         raise NotImplementedError
 
+    def __init__(self, *, app: Simpli, entity: AbstractEntity) -> None:
+        self._app: Simpli = app
+        self._entity: AbstractEntity = entity
+
+    @property
+    def app(self) -> Simpli:
+        return self._app
+
+    @property
+    def entity(self) -> AbstractEntity:
+        return self._entity
+
     def has_any(self, *component_types: Type[_CT]) -> bool:
         return any(self.has(component_type) for component_type in component_types)
 
@@ -44,7 +56,7 @@ class ComponentHolder(AbstractComponentHolder):
         self._components: Dict[str, Component] = {}
 
     def add(self, component_type: Type[_CT], *args: Any, **kwargs: Any) -> _CT:
-        component: _CT = component_type(app=self.app, entity=self.entity, *args, **kwargs)
+        component: _CT = component_type(_app=self.app, _entity=self.entity, *args, **kwargs)
         self._components[component_type.tag()] = component
         return component
 

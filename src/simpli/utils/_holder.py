@@ -3,7 +3,7 @@ from array import array
 from functools import partial
 from typing import Generic, TypeVar, List, Iterable
 
-from simpli.utils import Identifiable
+from simpli.interfaces import Identifiable
 
 _IT = TypeVar('_IT', bound=Identifiable)
 
@@ -60,7 +60,7 @@ class Holder(AbstractHolder, Generic[_IT]):
             self._indices.append(index)
             identifier: int = index
 
-        item.identifier = identifier
+        item.set_identifier_if_none(identifier)
         return identifier
 
     def remove(self, identifier: int) -> _IT:

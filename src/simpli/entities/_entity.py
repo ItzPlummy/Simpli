@@ -1,9 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Type, TYPE_CHECKING, Any, TypeVar, Iterable, Optional
+from typing import TYPE_CHECKING, Any, TypeVar, Iterable, Optional, Sequence, Tuple, Type, Dict
 
 from simpli.components import AbstractComponentHolder, ComponentHolder
 from simpli.components import Component
-from simpli.utils import Identifiable, AppDependant, AbstractIdentifierHolder, IdentifierHolder
+from simpli.interfaces import AppDependant, Identifiable
+from simpli.utils import AbstractIdentifierHolder, IdentifierHolder
 
 if TYPE_CHECKING:
     from simpli import Simpli
@@ -35,10 +36,6 @@ class AbstractEntity(AppDependant, Identifiable, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def add_child(self, child_type: Type['AbstractEntity'], *args: Any, **kwargs: Any) -> 'AbstractEntity':
-        raise NotImplementedError
-
-    @abstractmethod
     def set_child(self, child: 'AbstractEntity') -> 'AbstractEntity':
         raise NotImplementedError
 
@@ -54,6 +51,30 @@ class AbstractEntity(AppDependant, Identifiable, ABC):
     def destroy(self) -> None:
         raise NotImplementedError
 
+    def __init__(self, app: Simpli) -> None:
+        self._app: Simpli = app
+        self._identifier: int | None = None
+
+    @property
+    def app(self) -> Simpli:
+        return self._app
+
+    @property
+    def identifier(self) -> int:
+        if self._identifier is None:
+            raise ValueError("Identifier is not set")
+
+        return self._identifier
+
+    def set_identifier_if_none(self, identifier: int) -> None:
+        if identifier is None:
+            raise ValueError("Identifier cannot be None")
+
+        if self._identifier is not None:
+            raise ValueError("Identifier is already set")
+
+        self._identifier = identifier
+
 
 _ET = TypeVar('_ET', bound="Entity")
 
@@ -65,6 +86,8 @@ class Entity(AbstractEntity):
             app: Simpli,
             name: str | None = None,
             parent: AbstractEntity | None = None,
+            children: Sequence[AbstractEntity] | None = None,
+            components: Sequence[Tuple[Type[Component], Dict[str, Any]]] | None = None,
     ) -> None:
         super().__init__(app=app)
 
@@ -72,6 +95,14 @@ class Entity(AbstractEntity):
         self._parent: AbstractEntity | None = parent
         self._children: AbstractIdentifierHolder = IdentifierHolder()
         self._components: AbstractComponentHolder = ComponentHolder(app=app, entity=self)
+
+        if children:
+            for child in children:
+                self.set_child(child)
+
+        if components:
+            for component_type, kwargs in components:
+                self._components.add(component_type, **kwargs)
 
     @property
     def name(self) -> str | None:
@@ -91,12 +122,6 @@ class Entity(AbstractEntity):
 
     def _set_parent(self, parent: AbstractEntity | None) -> None:
         self._parent = parent
-
-    def add_child(self, child_type: Type[_AET], *args: Any, **kwargs: Any) -> _AET:
-        child: _AET = self.app.entities.new(child_type, *args, **kwargs)
-        self._children.add(child.identifier)
-        child._set_parent(self)
-        return child
 
     def set_child(self, child: _AET) -> _AET:
         if child.identifier in self._children:

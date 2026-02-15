@@ -3,7 +3,8 @@ from typing import Type, TYPE_CHECKING, Any, Iterable, TypeVar, overload
 
 from simpli.components import Component
 from simpli.entities import Entity, AbstractEntity
-from simpli.utils import Holder, AppDependant
+from simpli.interfaces import AppDependant
+from simpli.utils import Holder
 
 if TYPE_CHECKING:
     from simpli import Simpli
@@ -50,19 +51,20 @@ class AbstractEntityHolder(AppDependant, ABC):
     def by_components(self, *component_types: Type[_CT]) -> Iterable[AbstractEntity]:
         raise NotImplementedError
 
+    def __init__(self, *, app: Simpli) -> None:
+        self._app: Simpli = app
+
+    @property
+    def app(self) -> Simpli:
+        return self._app
+
 
 class EntityHolder(AbstractEntityHolder):
-    def __init__(self, app: Simpli, **kwargs: Any) -> None:
-        super().__init__(app=app, **kwargs)
-
+    def __init__(self, *, app: Simpli) -> None:
+        super().__init__(app=app)
         self._entities: Holder[Entity] = Holder()
 
-    def new(
-            self,
-            entity_type: Type[_ET] | None = None,
-            *args: Any,
-            **kwargs: Any
-    ) -> _ET:
+    def new(self, entity_type: Type[_ET] | None = None, *args: Any, **kwargs: Any) -> _ET:
         if entity_type is None:
             entity_type = Entity
 

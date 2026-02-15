@@ -10,8 +10,9 @@ from simpli.components import PositionComponent, VelocityComponent, AirFrictionC
 from simpli.entities import AbstractEntityHolder, EntityHolder, Entity, AbstractEntity
 from simpli.internal import Shaders
 from simpli.shapes import Circle
+from simpli.shapes import ShapeHolder, AbstractShapeHolder
 from simpli.systems import AbstractSystemHolder, SystemHolder, TickSystem, VelocitySystem, AirFrictionSystem, \
-    ShapeRenderSystem, GravitySystem
+    ShapeUpdateSystem, GravitySystem
 from simpli.utils import Color, Vector
 
 
@@ -51,14 +52,15 @@ class Simpli:
             Shader(Shaders.LAYOUT_FRAGMENT_SHADER, "fragment"),
         )
 
-        self._system_holder: AbstractSystemHolder = SystemHolder(self)
-        self._entities: AbstractEntityHolder = EntityHolder(self)
+        self._systems: AbstractSystemHolder = SystemHolder(app=self)
+        self._entities: AbstractEntityHolder = EntityHolder(app=self)
+        self._shapes: AbstractShapeHolder = ShapeHolder(app=self)
 
-        self._system_holder.add(
+        self._systems.add(
+            ShapeUpdateSystem,
             VelocitySystem,
             AirFrictionSystem,
             GravitySystem,
-            ShapeRenderSystem,
         )
 
         self._window.set_handler("on_draw", self._tick)
@@ -97,11 +99,15 @@ class Simpli:
 
     @property
     def system_holder(self) -> AbstractSystemHolder:
-        return self._system_holder
+        return self._systems
 
     @property
     def entities(self) -> AbstractEntityHolder:
         return self._entities
+
+    @property
+    def shapes(self) -> AbstractShapeHolder:
+        return self._shapes
 
     def run(self) -> Never:
         run()  # More logic upcoming, method won't be static
@@ -109,7 +115,7 @@ class Simpli:
     def _tick(self) -> None:
         self._window.clear()
 
-        for system in self._system_holder.by_system(TickSystem):
+        for system in self._systems.by_system(TickSystem):
             system.tick()
 
         self._program["u_window_size"] = self._window.size

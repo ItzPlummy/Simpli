@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any
+from dataclasses import dataclass
+from typing import Any, TYPE_CHECKING
 
-from simpli.interfaces import Tagged, Identifiable, AppDependant
+from simpli.interfaces import AppDependant, Identifiable
 
 if TYPE_CHECKING:
     from simpli import Simpli
@@ -9,15 +10,22 @@ else:
     Simpli = Any
 
 
-class System(AppDependant, Identifiable, Tagged, ABC):
-    @classmethod
+@dataclass(kw_only=True, slots=True)
+class Shape(AppDependant, Identifiable, ABC):
+    _app: Simpli
+    _identifier: int | None = None
+
     @abstractmethod
-    def system_tag(cls) -> str:
+    def create(self) -> Any:
         raise NotImplementedError
 
-    def __init__(self, app: Simpli) -> None:
-        self._app: Simpli = app
-        self._identifier: int | None = None
+    @abstractmethod
+    def update(self) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    def remove(self) -> None:
+        raise NotImplementedError
 
     @property
     def app(self) -> Simpli:
@@ -38,13 +46,3 @@ class System(AppDependant, Identifiable, Tagged, ABC):
             raise ValueError("Identifier is already set")
 
         self._identifier = identifier
-
-
-class TickSystem(System, ABC):
-    @abstractmethod
-    def tick(self) -> None:
-        raise NotImplementedError
-
-    @classmethod
-    def system_tag(cls) -> str:
-        return "tick"

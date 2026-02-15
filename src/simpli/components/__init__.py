@@ -1,62 +1,72 @@
-from typing import Type, Any
+from dataclasses import dataclass
 
 from simpli.shapes import Shape
-from simpli.utils import Vector
+from simpli.utils import Vector, Color
 from ._component import Component
 from ._component_holder import AbstractComponentHolder, ComponentHolder
 
 
-class ShapeComponent(Component):
-    def __component_init__(self, shape: Type[Shape], **kwargs: Any) -> None:
-        self.shape = shape(app=self.app, entity=self.entity, **kwargs)
-
-    @classmethod
-    def tag(cls) -> str:
-        return "shape"
-
-
+@dataclass(kw_only=True, slots=True)
 class PositionComponent(Component):
-    def __component_init__(self, position: Vector | None = None) -> None:
-        self.position = position or Vector.zero()
+    position: Vector = Vector.zero()
 
     @classmethod
     def tag(cls) -> str:
         return "position"
 
 
+@dataclass(kw_only=True, slots=True)
 class VelocityComponent(Component):
-    def __component_init__(self, velocity: Vector | None = None) -> None:
-        self.velocity = velocity or Vector.zero()
+    velocity: Vector = Vector.zero()
 
     @classmethod
     def tag(cls) -> str:
         return "velocity"
 
 
+@dataclass(kw_only=True, slots=True)
 class AirFrictionComponent(Component):
-    def __component_init__(self, air_friction: float | None = None) -> None:
-        self.air_friction = air_friction or 0.975
+    air_friction: float = 0.985
 
     @classmethod
     def tag(cls) -> str:
         return "air_friction"
 
 
+@dataclass(kw_only=True, slots=True)
 class GravityComponent(Component):
-    def __component_init__(self, gravity: Vector | None = None) -> None:
-        self.gravity = gravity or Vector(0, -0.25)
+    gravity: Vector = Vector(0, -0.25)
 
     @classmethod
     def tag(cls) -> str:
         return "gravity"
 
 
+@dataclass(kw_only=True, slots=True)
+class ShapeComponent(Component):
+    shape: Shape
+
+    @classmethod
+    def tag(cls) -> str:
+        return "shape"
+
+
+@dataclass(kw_only=True, slots=True)
+class CircleComponent(Component):
+    radius: float = 50
+    color: Color = Color.black()
+
+    @classmethod
+    def tag(cls) -> str:
+        return "circle"
+
+
 __all__ = [
     Component,
     ComponentHolder,
-    ShapeComponent,
     PositionComponent,
     VelocityComponent,
     AirFrictionComponent,
     GravityComponent,
+    ShapeComponent,
 ]

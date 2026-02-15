@@ -5,14 +5,14 @@ from ._system import System, TickSystem
 from ._system_holder import AbstractSystemHolder, SystemHolder
 
 
-class ShapeRenderSystem(TickSystem):
+class ShapeUpdateSystem(TickSystem):
     @classmethod
     def tag(cls) -> str:
-        return "shape_render"
+        return "shape_update"
 
     def tick(self) -> None:
-        for entity in self.app.entities.by_components(ShapeComponent):
-            entity.components.get(ShapeComponent).shape.update()
+        for shape in self.app.shapes:
+            shape.update()
 
 
 class VelocitySystem(TickSystem):

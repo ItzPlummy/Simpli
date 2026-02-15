@@ -1,45 +1,13 @@
+from dataclasses import dataclass
 from math import pi, cos, sin, sqrt
 from random import random
 from typing import Self, Tuple
 
 
+@dataclass(frozen=True, slots=True)
 class Vector:
-    __slots__ = ("_x", "_y")
-
-    def __init__(
-            self,
-            x: float,
-            y: float,
-    ) -> None:
-        self._x = float(x)
-        self._y = float(y)
-
-        if abs(self._x) < 0.0001:
-            self._x = float(0)
-        if abs(self._y) < 0.0001:
-            self._y = float(0)
-
-    @property
-    def x(self) -> float:
-        return self._x
-
-    @x.setter
-    def x(self, value: float) -> None:
-        if abs(value) < 0.0001:
-            self._x = float(0)
-        else:
-            self._x = float(value)
-
-    @property
-    def y(self) -> float:
-        return self._y
-
-    @y.setter
-    def y(self, value: float) -> None:
-        if abs(value) < 0.0001:
-            self._y = float(0)
-        else:
-            self._y = float(value)
+    x: float
+    y: float
 
     @property
     def length(self) -> float:
@@ -60,7 +28,7 @@ class Vector:
 
     @property
     def as_tuple(self) -> Tuple[float, float]:
-        return self._x, self._y
+        return self.x, self.y
 
     @classmethod
     def zero(cls) -> Self:
@@ -123,6 +91,3 @@ class Vector:
             other: Self
     ) -> float:
         return self.x * other.x + self.y * other.y
-
-    def copy(self) -> Self:
-        return Vector(self._x, self._y)

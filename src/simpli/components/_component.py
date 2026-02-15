@@ -1,7 +1,8 @@
-from abc import ABC, abstractmethod
-from typing import Any, TYPE_CHECKING
+from abc import ABC
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any
 
-from simpli.utils import Tagged, AppDependant, EntityDependant
+from simpli.interfaces import AppDependant, EntityDependant, Tagged
 
 if TYPE_CHECKING:
     from simpli import Simpli
@@ -11,16 +12,15 @@ else:
     AbstractEntity = Any
 
 
+@dataclass(kw_only=True, slots=True)
 class Component(AppDependant, EntityDependant, Tagged, ABC):
-    model_config = {
-        "arbitrary_types_allowed": True,
-        "slots": True,
-    }
+    _app: Simpli
+    _entity: AbstractEntity
 
-    @abstractmethod
-    def __component_init__(self, *args: Any, **kwargs: Any) -> None:
-        raise NotImplementedError
+    @property
+    def app(self) -> Simpli:
+        return self._app
 
-    def __init__(self, *args: Any, app: Simpli, entity: AbstractEntity, **kwargs: Any):
-        super().__init__(app=app, entity=entity)
-        self.__component_init__(*args, **kwargs)
+    @property
+    def entity(self) -> AbstractEntity:
+        return self._entity

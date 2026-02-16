@@ -2,7 +2,8 @@ from enum import IntEnum
 
 
 class LayerGroup(IntEnum):
-    BACKGROUND = -1
+    BACKGROUND = -2
+    SHADOW = -1
     GEOMETRY = 0
     LABELS = 1
     FOREGROUND = 2

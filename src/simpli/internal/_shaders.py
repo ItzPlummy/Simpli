@@ -125,3 +125,69 @@ class Shaders:
             }
         }
     """
+
+    GRID_VERTEX_SHADER = """
+        #version 150 core
+
+        in vec2 position;
+        in vec2 translation;
+        in vec4 colors;
+        in float zposition;
+        in float rotation;
+
+        out vec2 world_position;
+        out vec4 vertex_colors;
+
+        uniform WindowBlock
+        {
+            mat4 projection;
+            mat4 view;
+        } window;
+        uniform vec2 u_window_size;
+        uniform vec2 u_camera_position;
+        uniform float u_zoom;
+
+        void main()
+        {
+            float theta = radians(rotation);
+            float s = sin(theta);
+            float c = cos(theta);
+            vec2 rotated = vec2(
+                position.x * c - position.y * s,
+                position.x * s + position.y * c
+            );
+
+            world_position = translation + rotated;
+
+            gl_Position = window.projection * window.view * vec4((world_position - u_camera_position) * u_zoom + (u_window_size * 0.5), zposition, 1.0);
+            vertex_colors = colors;
+        }
+    """
+
+    GRID_FRAGMENT_SHADER = """
+        #version 150 core
+
+        in vec2 world_position;
+        in vec4 vertex_colors;
+        
+        out vec4 final_color;
+        
+        float gridLine(vec2 coord, float spacing)
+        {
+            vec2 g = abs(fract(coord / spacing - 0.5) - 0.5) / fwidth(coord / spacing);
+            float line = min(g.x, g.y);
+            return 1.0 - min(line, 1.0);
+        }
+        
+        void main()
+        {
+            float minor = gridLine(world_position, 50.0);
+            float major = gridLine(world_position, 250.0);
+        
+            float grid_intensity = minor * 0.05 + major * 0.15;
+        
+            vec3 modulated_color = vertex_colors.rgb * (1.0 - grid_intensity);
+        
+            final_color = vec4(modulated_color, vertex_colors.a);
+        }
+    """

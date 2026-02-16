@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Any, Sequence, Tuple, Type, Dict
 from simpli.components import Component, PositionComponent, CircleComponent, ShapeComponent, VelocityComponent, \
     AirFrictionComponent, RepulsionComponent
 from simpli.enums import LayerGroup
-from simpli.shapes import Circle
+from simpli.shapes import Circle, BackgroundRectangle
 from simpli.utils import Vector, Color, Value
 from ._entity import AbstractEntity, Entity
 from ._entity_holder import AbstractEntityHolder, EntityHolder
@@ -17,9 +17,9 @@ else:
 class CircleEntity(Entity):
     def __init__(
             self,
-            position: Vector = Vector.zero(),
-            radius: float = 50,
-            color: Color = Color.black(),
+            position: Vector | None = None,
+            radius: float | None = None,
+            color: Color | None = None,
             *,
             app: Simpli,
             name: str | None = None,
@@ -31,8 +31,8 @@ class CircleEntity(Entity):
             name=name,
             parent=parent,
             components=[
-                (PositionComponent, {"position": position}),
-                (CircleComponent, {"radius": radius, "color": color}),
+                (PositionComponent, {"position": position or Vector.zero()}),
+                (CircleComponent, {"radius": radius or 50, "color": color or Color.random_bright()}),
                 *(components or []),
             ],
         )
@@ -57,7 +57,7 @@ class CircleEntity(Entity):
                 components=[
                     (ShapeComponent, {"shape": app.shapes.new(
                         Circle,
-                        layer_group=LayerGroup.BACKGROUND,
+                        layer_group=LayerGroup.SHADOW,
                         position=Value(lambda: self.components.get(PositionComponent).position + Vector(5, -5)),
                         radius=Value(lambda: self.components.get(CircleComponent).radius),
                         color=Color.shadow(),
@@ -70,9 +70,9 @@ class CircleEntity(Entity):
 class RepulsiveCircleEntity(CircleEntity):
     def __init__(
             self,
-            position: Vector = Vector.zero(),
-            radius: float = 50,
-            color: Color = Color.black(),
+            position: Vector | None = None,
+            radius: float | None = None,
+            color: Color | None = None,
             initial_velocity: Vector = Vector.zero(),
             repulsion_strength: float = 1,
             *,
@@ -97,6 +97,19 @@ class RepulsiveCircleEntity(CircleEntity):
                 }),
                 *(components or []),
             ],
+        )
+
+
+class BackgroundRectangleEntity(Entity):
+    def __init__(self, *, app: Simpli) -> None:
+        super().__init__(
+            app=app,
+            name="background_rectangle",
+            components=[
+                (ShapeComponent, {"shape": app.shapes.new(
+                    BackgroundRectangle
+                )})
+            ]
         )
 
 

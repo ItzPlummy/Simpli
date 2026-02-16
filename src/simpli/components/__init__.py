@@ -33,11 +33,22 @@ class AirFrictionComponent(Component):
         return "air_friction"
 
 
+@dataclass(kw_only=True, slots=True)
+class AttractionComponent(Component):
+    strength: float = 1
+    range: float = 50
+    power_factor: float = 1
+
+    @classmethod
+    def tag(cls) -> str:
+        return "attraction"
+
+
 @dataclass
 class RepulsionComponent(Component):
-    repulsion_strength: float = 1
-    repulsion_range: float = 50
-    repulsion_power_factor: float = 1
+    strength: float = 1
+    range: float = 50
+    power_factor: float = 1
 
     @classmethod
     def tag(cls) -> str:

@@ -1,7 +1,7 @@
 from typing import TYPE_CHECKING, Any, Sequence, Tuple, Type, Dict
 
 from simpli.components import Component, PositionComponent, CircleComponent, ShapeComponent, VelocityComponent, \
-    AirFrictionComponent, RepulsionComponent
+    AirFrictionComponent, RepulsionComponent, AttractionComponent
 from simpli.enums import LayerGroup
 from simpli.shapes import Circle, BackgroundRectangle
 from simpli.utils import Vector, Color, Value
@@ -32,7 +32,7 @@ class CircleEntity(Entity):
             parent=parent,
             components=[
                 (PositionComponent, {"position": position or Vector.zero()}),
-                (CircleComponent, {"radius": radius or 50, "color": color or Color.random_bright()}),
+                (CircleComponent, {"radius": radius or 50, "color": color or Color.random()}),
                 *(components or []),
             ],
         )
@@ -67,14 +67,15 @@ class CircleEntity(Entity):
         )
 
 
-class RepulsiveCircleEntity(CircleEntity):
+class CellEntity(CircleEntity):
     def __init__(
             self,
             position: Vector | None = None,
             radius: float | None = None,
             color: Color | None = None,
-            initial_velocity: Vector = Vector.zero(),
-            repulsion_strength: float = 1,
+            initial_velocity: Vector | None = None,
+            attraction_strength: float | None = None,
+            repulsion_strength: float | None = None,
             *,
             app: Simpli,
             name: str | None = None,
@@ -89,18 +90,24 @@ class RepulsiveCircleEntity(CircleEntity):
             name=name,
             parent=parent,
             components=[
-                (VelocityComponent, {"velocity": initial_velocity}),
+                (VelocityComponent, {"velocity": initial_velocity or Vector.zero()}),
                 (AirFrictionComponent, {}),
+                (AttractionComponent, {
+                    "strength": attraction_strength or 0.25,
+                    "range": Value(lambda: self.components.get(CircleComponent).radius * 10),
+                    "power_factor": 0.25,
+                }),
                 (RepulsionComponent, {
-                    "repulsion_strength": repulsion_strength,
-                    "repulsion_range": Value(lambda: self.components.get(CircleComponent).radius * 2.5)
+                    "strength": repulsion_strength or 2,
+                    "range": Value(lambda: self.components.get(CircleComponent).radius * 2.5),
+                    "power_factor": 1.25,
                 }),
                 *(components or []),
             ],
         )
 
 
-class BackgroundRectangleEntity(Entity):
+class BackgroundEntity(Entity):
     def __init__(self, *, app: Simpli) -> None:
         super().__init__(
             app=app,

@@ -57,6 +57,10 @@ class AbstractCamera(AppDependant, ABC):
     def target_position_from_window(self, window_position: Vector) -> Vector:
         raise NotImplementedError
 
+    @abstractmethod
+    def captures_radius(self, position: Vector, radius: float) -> bool:
+        raise NotImplementedError
+
     def __init__(self, *, app: Simpli) -> None:
         self._app: Simpli = app
 
@@ -162,4 +166,12 @@ class Camera(AbstractCamera):
         return (
                 (window_position - Vector(self.app.window.width / 2, self.app.window.height / 2))
                 * (1 / self._target_zoom) + self._target_position
+        )
+
+    def captures_radius(self, position: Vector, radius: float) -> bool:
+        relative_position: Vector = position - self.position
+
+        return (
+                abs(relative_position.x) - radius < (self.app.window_width / self.zoom) / 2
+                and abs(relative_position.y) - radius < (self.app.window_height / self.zoom) / 2
         )

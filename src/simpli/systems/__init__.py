@@ -1,4 +1,5 @@
-from simpli.components import VelocityComponent, PositionComponent, AirFrictionComponent, RepulsionComponent
+from simpli.components import VelocityComponent, PositionComponent, AirFrictionComponent, RepulsionComponent, \
+    AttractionComponent
 from simpli.utils import Vector, safe_power
 from ._system import System, TickSystem
 from ._system_holder import AbstractSystemHolder, SystemHolder
@@ -42,41 +43,70 @@ class AirFrictionSystem(TickSystem):
             entity.components.get(VelocityComponent).velocity = velocity
 
 
+class AttractionSystem(TickSystem):
+    @classmethod
+    def tag(cls) -> str:
+        return "attraction"
+
+    def tick(self) -> None:
+        for entity in self.app.entities.by_components(PositionComponent, AttractionComponent):
+            position: Vector = entity.components.get(PositionComponent).position
+            attraction: AttractionComponent = entity.components.get(AttractionComponent)
+
+            for nearby_entity in self.app.entities.nearby(
+                    position,
+                    attraction.range,
+                    PositionComponent,
+                    VelocityComponent,
+            ):
+                if entity.identifier == nearby_entity.identifier:
+                    continue
+
+                distance: Vector = position - nearby_entity.components.get(PositionComponent).position
+
+                if distance.length_squared < 0.001:
+                    distance = Vector.random() * 0.1
+
+                distance_ratio: float = distance.length / attraction.range
+
+                nearby_entity.components.get(VelocityComponent).velocity += (
+                        distance.normalized
+                        * (1 - safe_power(distance_ratio, attraction.power_factor))
+                        * attraction.strength
+                )
+
+
 class RepulsionSystem(TickSystem):
     @classmethod
     def tag(cls) -> str:
         return "repulsion"
 
     def tick(self) -> None:
-        for entity in self.app.entities.by_components(PositionComponent, VelocityComponent, RepulsionComponent):
+        for entity in self.app.entities.by_components(PositionComponent, RepulsionComponent):
             position: Vector = entity.components.get(PositionComponent).position
-            repulsion_velocity: Vector = Vector.zero()
+            repulsion: RepulsionComponent = entity.components.get(RepulsionComponent)
 
-            for another_entity in self.app.entities.by_components(PositionComponent, RepulsionComponent):
-                if entity.identifier == another_entity.identifier:
+            for nearby_entity in self.app.entities.nearby(
+                    position,
+                    repulsion.range,
+                    PositionComponent,
+                    VelocityComponent,
+            ):
+                if entity.identifier == nearby_entity.identifier:
                     continue
 
-                distance: Vector = position - another_entity.components.get(PositionComponent).position
+                distance: Vector = nearby_entity.components.get(PositionComponent).position - position
 
-                if distance.length_squared < 0.01:
-                    distance = Vector.random() * 0.0001
+                if distance.length_squared < 0.001:
+                    distance = Vector.random() * 0.1
 
-                repulsion_strength: float = another_entity.components.get(RepulsionComponent).repulsion_strength
-                repulsion_range: float = another_entity.components.get(RepulsionComponent).repulsion_range
-                repulsion_power_factor: float = another_entity.components.get(RepulsionComponent).repulsion_power_factor
+                distance_ratio: float = distance.length / repulsion.range
 
-                distance_ratio: float = distance.length / repulsion_range
-
-                if distance_ratio > 1:
-                    continue
-
-                repulsion_velocity += (
+                nearby_entity.components.get(VelocityComponent).velocity += (
                         distance.normalized
-                        * (1 - safe_power(distance_ratio, repulsion_power_factor))
-                        * repulsion_strength
+                        * (1 - safe_power(distance_ratio, repulsion.power_factor))
+                        * repulsion.strength
                 )
-
-            entity.components.get(VelocityComponent).velocity += repulsion_velocity
 
 
 __all__ = [

@@ -1,5 +1,5 @@
 from simpli import Simpli, Vector, MouseButton, VelocityComponent, PositionComponent
-from simpli.entities import RepulsiveCircleEntity
+from simpli.entities import CellEntity
 
 
 class MyApp(Simpli):
@@ -9,14 +9,15 @@ class MyApp(Simpli):
             button: MouseButton,
     ) -> None:
         if button == MouseButton.LEFT:
-            self.entities.new(RepulsiveCircleEntity, position)
+            for i in range(5):
+                self.entities.new(CellEntity, position + Vector.random() * 50, 40)
         else:
             repulsion_radius: float = 500
 
             for entity in self.entities.nearby(position, repulsion_radius, PositionComponent, VelocityComponent):
                 entity_position: Vector = entity.components.get(PositionComponent).position
                 distance: Vector = entity_position - position
-                entity.components.get(VelocityComponent).velocity += distance.normalized * (repulsion_radius - distance.length) * 0.1
+                entity.components.get(VelocityComponent).velocity += distance.normalized * (repulsion_radius - distance.length) * 0.05
 
 
 MyApp().run()

@@ -9,13 +9,13 @@ from pyglet.window import Window
 
 from simpli.camera import AbstractCamera, Camera
 from simpli.components import PositionComponent, VelocityComponent, AirFrictionComponent, ShapeComponent
-from simpli.entities import AbstractEntityHolder, EntityHolder, Entity, AbstractEntity, BackgroundRectangleEntity
+from simpli.entities import AbstractEntityHolder, EntityHolder, Entity, AbstractEntity, BackgroundEntity
 from simpli.enums import MouseButton, LayerGroup
 from simpli.internal import Shaders
 from simpli.shapes import Circle
 from simpli.shapes import ShapeHolder, AbstractShapeHolder
 from simpli.systems import AbstractSystemHolder, SystemHolder, TickSystem, VelocitySystem, AirFrictionSystem, \
-    ShapeUpdateSystem, RepulsionSystem
+    ShapeUpdateSystem, RepulsionSystem, AttractionSystem
 from simpli.utils import Color, Vector
 
 
@@ -70,13 +70,14 @@ class Simpli:
         self._systems.add(
             VelocitySystem,
             AirFrictionSystem,
+            AttractionSystem,
             RepulsionSystem,
             ShapeUpdateSystem,
         )
 
         self._window_mouse_position: Vector = Vector.zero()
 
-        self._entities.new(BackgroundRectangleEntity)
+        self._entities.new(BackgroundEntity)
 
         self._window.set_handler("on_draw", self._tick)
         self._window.set_handler("on_mouse_motion", self._mouse_move)

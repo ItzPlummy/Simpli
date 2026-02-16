@@ -19,7 +19,23 @@ class Shape(AppDependant, Identifiable, ABC):
     _app: Simpli
     _identifier: int | None = None
 
+    visible: bool = True
     layer_group: LayerGroup = LayerGroup.GEOMETRY
+    _previous_visible: bool = None
+    _previous_layer_group: LayerGroup = None
+
+    _base: Any = None
+
+    def __post_init__(self) -> None:
+        self._previous_visible = self.visible
+        self._previous_layer_group = LayerGroup(self.layer_group.value)
+
+        self._base = self.create()
+
+    @property
+    @abstractmethod
+    def is_visible(self) -> bool:
+        raise NotImplementedError
 
     @abstractmethod
     def create(self) -> Any:
@@ -27,10 +43,6 @@ class Shape(AppDependant, Identifiable, ABC):
 
     @abstractmethod
     def update(self) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def remove(self) -> None:
         raise NotImplementedError
 
     @property
@@ -52,3 +64,6 @@ class Shape(AppDependant, Identifiable, ABC):
             raise ValueError("Identifier is already set")
 
         self._identifier = identifier
+
+    def remove(self) -> None:
+        self._base.delete()

@@ -1,6 +1,7 @@
 from ._color import Color
 from ._holder import AbstractHolder, Holder
 from ._identifier_holder import AbstractIdentifierHolder, IdentifierHolder
+from ._signature import Signature
 from ._value import Value
 from ._vector import Vector
 
@@ -16,6 +17,7 @@ __all__ = [
     Holder,
     AbstractIdentifierHolder,
     IdentifierHolder,
+    Signature,
     Value,
     Vector,
 ]

@@ -14,3 +14,9 @@ class Signature(Generic[_T]):
 
     def __eq__(self, other: Self) -> bool:
         return self._values == other._values
+
+    def __ge__(self, other: Self) -> bool:
+        return self._values >= other._values
+
+    def __le__(self, other: Self) -> bool:
+        return self._values <= other._values

@@ -1,7 +1,8 @@
+from ._archetype import Archetype
+from ._archetype_holder import AbstractArchetypeHolder, ArchetypeHolder
 from ._color import Color
 from ._holder import AbstractHolder, Holder
 from ._identifier_holder import AbstractIdentifierHolder, IdentifierHolder
-from ._signature import Signature
 from ._value import Value
 from ._vector import Vector
 
@@ -12,12 +13,14 @@ def safe_power(value: float, power: float) -> float:
 
 
 __all__ = [
+    Archetype,
+    AbstractArchetypeHolder,
+    ArchetypeHolder,
     Color,
     AbstractHolder,
     Holder,
     AbstractIdentifierHolder,
     IdentifierHolder,
-    Signature,
     Value,
     Vector,
 ]

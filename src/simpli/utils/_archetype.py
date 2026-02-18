@@ -5,7 +5,7 @@ from simpli.interfaces import Tagged
 _T = TypeVar("_T", bound=Tagged)
 
 
-class Signature(Generic[_T]):
+class Archetype(Generic[_T]):
     def __init__(
             self,
             *values: _T,

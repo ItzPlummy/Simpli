@@ -22,13 +22,11 @@ class Color:
     def random(cls) -> Self:
         values: List[float] = [0, random(), 1]
         shuffle(values)
-
         return cls(values[0], values[1], values[2])
 
     @classmethod
     def random_bright(cls) -> Self:
         color: Self = cls.random()
-
         return cls(
             color.red + (1 - color.red) / 2,
             color.green + (1 - color.green) / 2,
@@ -38,8 +36,11 @@ class Color:
     @classmethod
     def random_dark(cls) -> Self:
         color: Self = cls.random()
-
-        return cls(color.red / 2, color.green / 2, color.blue / 2)
+        return cls(
+            color.red / 2,
+            color.green / 2,
+            color.blue / 2,
+        )
 
     @classmethod
     def black(cls) -> Self:

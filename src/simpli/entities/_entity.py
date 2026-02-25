@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any, TypeVar, Iterable, Optional, Sequence, Tuple, Type, Dict
+from typing import TYPE_CHECKING, Any, TypeVar, Iterable, Optional, Sequence, Tuple, Type, Dict, Callable, Set
 
-from simpli.components import AbstractComponentHolder, ComponentHolder
 from simpli.components import Component
-from simpli.interfaces import AppDependant, Identifiable
-from simpli.utils import AbstractIdentifierHolder, IdentifierHolder
+from simpli.interfaces import AppDependant, ArchetypedIdentifiable
+from simpli.interfaces import Archetype
+from simpli.interfaces._archetyped import _T
 
 if TYPE_CHECKING:
     from simpli import Simpli
@@ -15,7 +15,7 @@ _CT = TypeVar("_CT", bound=Component)
 _AET = TypeVar("_AET", bound="AbstractEntity")
 
 
-class AbstractEntity(AppDependant, Identifiable, ABC):
+class AbstractEntity(AppDependant, ArchetypedIdentifiable, ABC):
     @property
     @abstractmethod
     def parent(self) -> Optional['AbstractEntity']:
@@ -24,11 +24,6 @@ class AbstractEntity(AppDependant, Identifiable, ABC):
     @property
     @abstractmethod
     def children(self) -> Iterable['AbstractEntity']:
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def components(self) -> AbstractComponentHolder:
         raise NotImplementedError
 
     @abstractmethod
@@ -40,11 +35,27 @@ class AbstractEntity(AppDependant, Identifiable, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def has_child(self, identifier) -> bool:
+    def has_child(self, archetype: Archetype[_CT], identifier) -> bool:
         raise NotImplementedError
 
     @abstractmethod
-    def remove_child(self, identifier: int) -> 'AbstractEntity':
+    def remove_child(self, archetype: Archetype[_CT], identifier: int) -> 'AbstractEntity':
+        raise NotImplementedError
+
+    @abstractmethod
+    def add_component(self, component_type: Type[_CT], **kwargs: Any) -> _CT:
+        raise NotImplementedError
+
+    @abstractmethod
+    def get_component(self, component_type: Type[_CT]) -> _CT:
+        raise NotImplementedError
+
+    @abstractmethod
+    def has_component(self, component_type: Type[_CT]) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    def remove_component(self, component_type: Type[_CT]) -> None:
         raise NotImplementedError
 
     @abstractmethod
@@ -75,6 +86,12 @@ class AbstractEntity(AppDependant, Identifiable, ABC):
 
         self._identifier = identifier
 
+    def has_any_components(self, *component_types: Type[_CT]) -> bool:
+        return any(self.has_component(component_type) for component_type in component_types)
+
+    def has_all_components(self, *component_types: Type[_CT]) -> bool:
+        return all(self.has_component(component_type) for component_type in component_types)
+
 
 _ET = TypeVar('_ET', bound="Entity")
 
@@ -86,18 +103,21 @@ class Entity(AbstractEntity):
             app: Simpli,
             name: str | None = None,
             parent: AbstractEntity | None = None,
-            components: Sequence[Tuple[Type[Component], Dict[str, Any]]] | None = None,
+            components: Sequence[Tuple[Type[_CT], Dict[str, Any]]] | None = None,
     ) -> None:
         super().__init__(app=app)
 
         self._name: str | None = name
         self._parent: AbstractEntity | None = parent
-        self._children: AbstractIdentifierHolder = IdentifierHolder()
-        self._components: AbstractComponentHolder = ComponentHolder(app=app, entity=self)
+        self._children: Set[Tuple[Archetype[_CT], int]] = set()
+        self._components: Dict[str, _CT] = {}
 
         if components:
             for component_type, kwargs in components:
-                self._components.add(component_type, **kwargs)
+                self._components[component_type.tag()] = component_type(_app=app, _entity=self, **kwargs)
+
+        self._archetype: Archetype[_CT] = self._get_archetype()
+        self._on_archetype_change: Callable[[int, Archetype[_CT], Archetype[_CT]], None] | None = None
 
     @property
     def name(self) -> str | None:
@@ -109,37 +129,80 @@ class Entity(AbstractEntity):
 
     @property
     def children(self) -> Iterable[AbstractEntity]:
-        return map(self.app.entities.__getitem__, self._children.__iter__())
+        return (self.app.entities.get(*child) for child in self._children)
 
     @property
-    def components(self) -> AbstractComponentHolder:
-        return self._components
+    def archetype(self) -> Archetype[_CT]:
+        return self._archetype
+
+    @property
+    def on_archetype_change(self) -> Callable[[int, Archetype[_CT], Archetype[_CT]], None]:
+        if self._on_archetype_change is None:
+            raise ValueError
+        return self._on_archetype_change
+
+    def set_child(self, child: _AET) -> _AET:
+        if (child.archetype, child.identifier) in self._children:
+            raise ValueError(f"Entity {child.identifier} is already a child of {self.identifier}")
+
+        if child.parent is not None:
+            child.parent.remove_child(child.archetype, child.identifier)
+
+        self._children.add((child.archetype, child.identifier))
+        child._set_parent(self)
+        return child
+
+    def has_child(self, archetype: Archetype[_CT], identifier) -> bool:
+        return (archetype, identifier) in self._children
+
+    def remove_child(self, archetype: Archetype[_CT], identifier: int) -> AbstractEntity:
+        if (archetype, identifier) not in self._children:
+            raise KeyError(f"Entity {identifier} is not a child of {self.identifier}")
+
+        self._children.remove((archetype, identifier))
+        child: AbstractEntity = self.app.entities.get(archetype, identifier)
+        child._set_parent(None)
+        return child
+
+    def add_component(self, component_type: Type[_CT], **kwargs: Any) -> _CT:
+        component: _CT = component_type(_app=self.app, _entity=self, **kwargs)
+        self._components[component_type.tag()] = component
+
+        new_archetype: Archetype[Component] = self._get_archetype()
+        self._on_archetype_change(self.identifier, self._archetype, new_archetype)
+        self._archetype = new_archetype
+
+        return component
+
+    def get_component(self, component_type: Type[_CT]) -> _CT:
+        try:
+            return self._components[component_type.tag()]
+        except KeyError:
+            raise KeyError(f"Component \"{component_type.tag()}\" was not found")
+
+    def has_component(self, component_type: Type[_CT]) -> bool:
+        return component_type.tag() in self._components
+
+    def remove_component(self, component_type: Type[_CT]) -> None:
+        try:
+            self._components.pop(component_type.tag())
+        except KeyError:
+            raise KeyError(f"Component \"{component_type.tag()}\" was not found")
+
+        new_archetype: Archetype[Component] = self._get_archetype()
+        self._on_archetype_change(self.identifier, self._archetype, new_archetype)
+        self._archetype = new_archetype
+
+    def destroy(self) -> None:
+        self.app.entities.remove(self.archetype, self.identifier)
+
+    def set_on_archetype_change_if_none(self, callback: Callable[[int, Archetype[_CT], Archetype[_CT]], None]) -> None:
+        if self._on_archetype_change is not None:
+            raise ValueError
+        self._on_archetype_change = callback
 
     def _set_parent(self, parent: AbstractEntity | None) -> None:
         self._parent = parent
 
-    def set_child(self, child: _AET) -> _AET:
-        if child.identifier in self._children:
-            raise ValueError(f"Entity {child.identifier} is already a child of {self.identifier}")
-
-        if child.parent is not None:
-            child.parent.remove_child(child.identifier)
-
-        self._children.add(child.identifier)
-        child._set_parent(self)
-        return child
-
-    def has_child(self, identifier) -> bool:
-        return identifier in self._children
-
-    def remove_child(self, identifier: int) -> AbstractEntity:
-        if identifier not in self._children:
-            raise KeyError(f"Entity {identifier} is not a child of {self.identifier}")
-
-        self._children.remove(identifier)
-        child: AbstractEntity = self.app.entities[identifier]
-        child._set_parent(None)
-        return child
-
-    def destroy(self) -> None:
-        self.app.entities.remove(self.identifier)
+    def _get_archetype(self) -> Archetype[_CT]:
+        return Archetype(*self._components.values())

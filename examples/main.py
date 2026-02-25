@@ -15,9 +15,9 @@ class MyApp(Simpli):
             repulsion_radius: float = 500
 
             for entity in self.entities.nearby(position, repulsion_radius, PositionComponent, VelocityComponent):
-                entity_position: Vector = entity.components.get(PositionComponent).position
+                entity_position: Vector = entity.get_component(PositionComponent).position
                 distance: Vector = entity_position - position
-                entity.components.get(VelocityComponent).velocity += distance.normalized * (repulsion_radius - distance.length) * 0.05
+                entity.get_component(VelocityComponent).velocity += distance.normalized * (repulsion_radius - distance.length) * 0.05
 
 
 MyApp().run()

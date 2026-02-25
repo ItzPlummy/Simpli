@@ -3,7 +3,7 @@ from typing import Type, TYPE_CHECKING, Any, Iterable, TypeVar
 
 from simpli.interfaces import AppDependant
 from simpli.shapes import Shape
-from simpli.utils import Holder
+from simpli.utils import IdentifiableHolder
 
 if TYPE_CHECKING:
     from simpli import Simpli
@@ -50,7 +50,7 @@ class AbstractShapeHolder(AppDependant, ABC):
 class ShapeHolder(AbstractShapeHolder):
     def __init__(self, *, app: Simpli) -> None:
         super().__init__(app=app)
-        self._shapes: Holder[Shape] = Holder()
+        self._shapes: IdentifiableHolder[Shape] = IdentifiableHolder()
 
     def new(self, shape_type: Type[_ST], **kwargs: Any) -> _ST:
         shape: _ST = shape_type(_app=self.app, **kwargs)

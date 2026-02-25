@@ -4,7 +4,7 @@ from typing import Type, TypeVar, Iterable, TYPE_CHECKING, Any, Dict
 
 from simpli.interfaces import AppDependant
 from simpli.systems import System
-from simpli.utils import Holder
+from simpli.utils import IdentifiableHolder
 
 _TS = TypeVar('_TS', bound=System)
 
@@ -34,7 +34,7 @@ class AbstractSystemHolder(AppDependant, ABC):
 class SystemHolder(AbstractSystemHolder):
     def __init__(self, *, app: Simpli) -> None:
         super().__init__(app=app)
-        self._systems: Dict[str, Holder[_TS]] = defaultdict(Holder)
+        self._systems: Dict[str, IdentifiableHolder[_TS]] = defaultdict(IdentifiableHolder)
 
     def add(self, *systems: Type[_TS]) -> None:
         for system in systems:

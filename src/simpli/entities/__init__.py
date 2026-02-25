@@ -43,9 +43,9 @@ class CircleEntity(Entity):
                 components=[
                     (ShapeComponent, {"shape": app.shapes.new(
                         Circle,
-                        position=Value(lambda: self.components.get(PositionComponent).position),
-                        radius=Value(lambda: self.components.get(CircleComponent).radius),
-                        color=Value(lambda: self.components.get(CircleComponent).color),
+                        position=Value(lambda: self.get_component(PositionComponent).position),
+                        radius=Value(lambda: self.get_component(CircleComponent).radius),
+                        color=Value(lambda: self.get_component(CircleComponent).color),
                     )})
                 ],
             ),
@@ -58,8 +58,8 @@ class CircleEntity(Entity):
                     (ShapeComponent, {"shape": app.shapes.new(
                         Circle,
                         layer_group=LayerGroup.SHADOW,
-                        position=Value(lambda: self.components.get(PositionComponent).position + Vector(5, -5)),
-                        radius=Value(lambda: self.components.get(CircleComponent).radius),
+                        position=Value(lambda: self.get_component(PositionComponent).position + Vector(5, -5)),
+                        radius=Value(lambda: self.get_component(CircleComponent).radius),
                         color=Color.shadow(),
                     )})
                 ],
@@ -94,12 +94,12 @@ class CellEntity(CircleEntity):
                 (AirFrictionComponent, {}),
                 (AttractionComponent, {
                     "strength": attraction_strength or 0.25,
-                    "range": Value(lambda: self.components.get(CircleComponent).radius * 10),
+                    "range": Value(lambda: self.get_component(CircleComponent).radius * 10),
                     "power_factor": 0.25,
                 }),
                 (RepulsionComponent, {
                     "strength": repulsion_strength or 2,
-                    "range": Value(lambda: self.components.get(CircleComponent).radius * 2.5),
+                    "range": Value(lambda: self.get_component(CircleComponent).radius * 2.5),
                     "power_factor": 1.25,
                 }),
                 *(components or []),

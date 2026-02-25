@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from simpli.shapes import Shape
 from simpli.utils import Vector, Color
 from ._component import Component
-from ._component_holder import AbstractComponentHolder, ComponentHolder
 
 
 @dataclass(kw_only=True, slots=True)
@@ -76,7 +75,6 @@ class CircleComponent(Component):
 
 __all__ = [
     Component,
-    ComponentHolder,
     PositionComponent,
     VelocityComponent,
     AirFrictionComponent,

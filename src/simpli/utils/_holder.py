@@ -3,22 +3,20 @@ from array import array
 from functools import partial
 from typing import Generic, TypeVar, List, Iterable
 
-from simpli.interfaces import Identifiable
-
-_IT = TypeVar('_IT', bound=Identifiable)
+_T = TypeVar('_T', bound=object)
 
 
-class AbstractHolder(ABC, Generic[_IT]):
+class AbstractHolder(Generic[_T], ABC):
     @abstractmethod
-    def add(self, item: _IT) -> int:
+    def add(self, item: _T) -> int:
         raise NotImplementedError
 
     @abstractmethod
-    def remove(self, identifier: int) -> _IT:
+    def remove(self, identifier: int) -> _T:
         raise NotImplementedError
 
     @abstractmethod
-    def __getitem__(self, identifier: int) -> _IT:
+    def __getitem__(self, identifier: int) -> _T:
         raise NotImplementedError
 
     @abstractmethod
@@ -30,11 +28,11 @@ class AbstractHolder(ABC, Generic[_IT]):
         raise NotImplementedError
 
     @abstractmethod
-    def __iter__(self) -> Iterable[_IT]:
+    def __iter__(self) -> Iterable[_T]:
         raise NotImplementedError
 
 
-class Holder(AbstractHolder, Generic[_IT]):
+class Holder(AbstractHolder, Generic[_T]):
     __slots__ = (
         "_items",
         "_ids",
@@ -42,14 +40,14 @@ class Holder(AbstractHolder, Generic[_IT]):
     )
 
     def __init__(self) -> None:
-        self._items: List[_IT] = []
+        self._items: List[_T] = []
         self._ids: array = array('I')
         self._indices: array = array('I')
 
         self._current_iterations: int = 0
         self._pending_operations: List[partial] = []
 
-    def add(self, item: _IT) -> int:
+    def add(self, item: _T) -> int:
         self._items.append(item)
         index: int = len(self._items) - 1
 
@@ -60,10 +58,9 @@ class Holder(AbstractHolder, Generic[_IT]):
             self._indices.append(index)
             identifier: int = index
 
-        item.set_identifier_if_none(identifier)
         return identifier
 
-    def remove(self, identifier: int) -> _IT:
+    def remove(self, identifier: int) -> _T:
         try:
             index: int = self._indices[identifier]
         except IndexError:
@@ -81,7 +78,7 @@ class Holder(AbstractHolder, Generic[_IT]):
 
         return self._items.pop()
 
-    def __getitem__(self, identifier: int) -> _IT:
+    def __getitem__(self, identifier: int) -> _T:
         try:
             return self._items[self._indices[identifier]]
         except IndexError:
@@ -96,7 +93,7 @@ class Holder(AbstractHolder, Generic[_IT]):
     def __len__(self) -> int:
         return len(self._items)
 
-    def __iter__(self) -> Iterable[_IT]:
+    def __iter__(self) -> Iterable[_T]:
         self._current_iterations += 1
 
         try:

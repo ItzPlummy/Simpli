@@ -9,36 +9,27 @@ if TYPE_CHECKING:
 else:
     Simpli = Any
 
-from simpli.interfaces import Tagged, ArchetypedIdentifiable, Archetype
+from simpli.interfaces import Tagged, ArchetypedIdentifiable, Archetype, ArchetypeID
 
 _T = TypeVar("_T", bound=Tagged)
 _AIT = TypeVar("_AIT", bound=ArchetypedIdentifiable)
 
 
-class AbstractArchetypeHolder(Generic[_T, _AIT], ABC):
+class AbstractArchetypeHolder(Generic[_AIT, _T], ABC):
     @abstractmethod
-    def add(self, item: _AIT) -> int:
+    def add(self, item: _AIT) -> ArchetypeID:
         raise NotImplementedError
 
     @abstractmethod
-    def get(self, archetype: Archetype[_T], identifier: int) -> _AIT:
+    def get(self, identifier: ArchetypeID) -> _AIT:
         raise NotImplementedError
 
     @abstractmethod
-    def has(self, archetype: Archetype[_T], identifier: int) -> bool:
+    def has(self, identifier: ArchetypeID) -> bool:
         raise NotImplementedError
 
     @abstractmethod
-    def remove(self, archetype: Archetype[_T], identifier: int) -> _AIT:
-        raise NotImplementedError
-
-    @abstractmethod
-    def change_archetype(
-            self,
-            previous_archetype: Archetype[_T],
-            new_archetype: Archetype[_T],
-            identifier: int,
-    ) -> int:
+    def remove(self, identifier: ArchetypeID) -> _AIT:
         raise NotImplementedError
 
     @abstractmethod
@@ -61,35 +52,24 @@ class AbstractArchetypeHolder(Generic[_T, _AIT], ABC):
         return self._app
 
 
-class ArchetypeHolder(AbstractArchetypeHolder, Generic[_T]):
+class ArchetypeHolder(AbstractArchetypeHolder):
     def __init__(self, *, app: Simpli) -> None:
         super().__init__(app=app)
         self._holders: Dict[Archetype[_T], Holder[_AIT]] = defaultdict(Holder)
 
-    def add(self, item: _AIT) -> int:
+    def add(self, item: _AIT) -> ArchetypeID:
         identifier: int = self._holders[item.archetype].add(item)
         item.set_identifier_if_none(identifier)
-        item.set_on_archetype_change_if_none(self.change_archetype)
-        return identifier
+        return ArchetypeID(item.archetype, identifier)
 
-    def get(self, archetype: Archetype[_T], identifier: int) -> _AIT:
-        return self._holders[archetype][identifier]
+    def get(self, identifier: ArchetypeID) -> _AIT:
+        return self._holders[identifier.archetype][identifier.identifier]
 
-    def has(self, archetype: Archetype[_T], identifier: int) -> bool:
-        return identifier in self._holders[archetype]
+    def has(self, identifier: ArchetypeID) -> bool:
+        return identifier.identifier in self._holders[identifier.archetype]
 
-    def remove(self, archetype: Archetype[_T], identifier: int) -> _AIT:
-        return self._holders[archetype].remove(identifier)
-
-    def change_archetype(
-            self,
-            identifier: int,
-            previous_archetype: Archetype[_T],
-            new_archetype: Archetype[_T],
-    ) -> int:
-        item: _AIT = self._holders[previous_archetype][identifier]
-        self._holders[previous_archetype].remove(identifier)
-        return self._holders[new_archetype].add(item)
+    def remove(self, identifier: ArchetypeID) -> _AIT:
+        return self._holders[identifier.archetype].remove(identifier.identifier)
 
     def __len__(self) -> int:
         return sum(map(len, self._holders.values()))

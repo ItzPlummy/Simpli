@@ -3,8 +3,8 @@ from typing import Type, TYPE_CHECKING, Any, Iterable, TypeVar, overload
 
 from simpli.components import Component, PositionComponent
 from simpli.entities import Entity, AbstractEntity
-from simpli.interfaces import AppDependant, Archetype
-from simpli.utils import Vector, ArchetypeHolder
+from simpli.interfaces import AppDependant, Archetype, ArchetypeID
+from simpli.utils import Vector, ArchetypeHolder, AbstractArchetypeHolder
 
 if TYPE_CHECKING:
     from simpli import Simpli
@@ -28,15 +28,15 @@ class AbstractEntityHolder(AppDependant, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get(self, archetype: Archetype[Component], identifier: int) -> AbstractEntity:
+    def get(self, identifier: ArchetypeID[Component]) -> AbstractEntity:
         raise NotImplementedError
 
     @abstractmethod
-    def has(self, archetype: Archetype[Component], identifier: int) -> bool:
+    def has(self, identifier: ArchetypeID[Component]) -> bool:
         raise NotImplementedError
 
     @abstractmethod
-    def remove(self, archetype: Archetype[Component], identifier: int) -> None:
+    def remove(self, identifier: ArchetypeID[Component]) -> None:
         raise NotImplementedError
 
     @abstractmethod
@@ -48,11 +48,11 @@ class AbstractEntityHolder(AppDependant, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def by_components(self, *component_types: Type[_CT]) -> Iterable[AbstractEntity]:
+    def by_components(self, *component_types: Type[Component]) -> Iterable[AbstractEntity]:
         raise NotImplementedError
 
     @abstractmethod
-    def nearby(self, position: Vector, radius: float, *component_types: Type[_CT]) -> Iterable[AbstractEntity]:
+    def nearby(self, position: Vector, radius: float, *component_types: Type[Component]) -> Iterable[AbstractEntity]:
         raise NotImplementedError
 
     def __init__(self, *, app: Simpli) -> None:
@@ -66,7 +66,7 @@ class AbstractEntityHolder(AppDependant, ABC):
 class EntityHolder(AbstractEntityHolder):
     def __init__(self, *, app: Simpli) -> None:
         super().__init__(app=app)
-        self._entities: ArchetypeHolder[Component] = ArchetypeHolder[Component](app=app)
+        self._entities: AbstractArchetypeHolder[Entity, Component] = ArchetypeHolder(app=app)
 
     def new(self, entity_type: Type[_ET] | None = None, *args: Any, **kwargs: Any) -> _ET:
         if entity_type is None:
@@ -77,22 +77,22 @@ class EntityHolder(AbstractEntityHolder):
 
         return entity
 
-    def remove(self, archetype: Archetype[Component], identifier: int) -> Entity:
-        entity: Entity = self.get(archetype, identifier)
+    def get(self, identifier: ArchetypeID[Component]) -> Entity:
+        return self._entities.get(identifier)
+
+    def has(self, identifier: ArchetypeID[Component]) -> bool:
+        return self._entities.has(identifier)
+
+    def remove(self, identifier: ArchetypeID[Component]) -> Entity:
+        entity: Entity = self.get(identifier)
 
         for child in entity.children:
-            self.remove(child.archetype, child.identifier)
+            self.remove(child.archetype_id)
 
         if entity.parent is not None:
-            entity.parent.remove_child(entity.archetype, entity.identifier)
+            entity.parent.remove_child(identifier)
 
-        return self._entities.remove(archetype, identifier)
-
-    def get(self, archetype: Archetype[Component], identifier: int) -> Entity:
-        return self._entities.get(archetype, identifier)
-
-    def has(self, archetype: Archetype[Component], identifier: int) -> bool:
-        return self._entities.has(archetype, identifier)
+        return self._entities.remove(identifier)
 
     def __len__(self) -> int:
         return len(self._entities)
@@ -100,10 +100,10 @@ class EntityHolder(AbstractEntityHolder):
     def __iter__(self) -> Iterable[Entity]:
         return self._entities.__iter__()
 
-    def by_components(self, *component_types: Type[_CT]) -> Iterable[Entity]:
+    def by_components(self, *component_types: Type[Component]) -> Iterable[Entity]:
         return self._entities.by_archetype(Archetype(*component_types))
 
-    def nearby(self, position: Vector, radius: float, *component_types: Type[_CT]) -> Iterable[Entity]:
+    def nearby(self, position: Vector, radius: float, *component_types: Type[Component]) -> Iterable[Entity]:
         for entity in self.by_components(PositionComponent, *component_types):
             if (entity.get_component(PositionComponent).position - position).length < radius:
                 yield entity

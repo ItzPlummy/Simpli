@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic, Callable, Self, FrozenSet
+from typing import TypeVar, Generic, Self, FrozenSet
 
 from ._tagged import Tagged
 
@@ -38,13 +38,4 @@ class Archetyped(Generic[_T], ABC):
     @property
     @abstractmethod
     def archetype(self) -> Archetype[_T]:
-        raise NotImplementedError
-
-    @property
-    @abstractmethod
-    def on_archetype_change(self) -> Callable[[int, Archetype[_T], Archetype[_T]], None]:
-        raise NotImplementedError
-
-    @abstractmethod
-    def set_on_archetype_change_if_none(self, value: Callable[[int, Archetype[_T], Archetype[_T]], int]) -> None:
         raise NotImplementedError

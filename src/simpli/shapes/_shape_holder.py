@@ -9,7 +9,6 @@ if TYPE_CHECKING:
     from simpli import Simpli
 else:
     Simpli = Any
-    AbstractEntity = Any
 
 _ST = TypeVar("_ST", bound=Shape)
 

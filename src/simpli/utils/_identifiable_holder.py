@@ -33,7 +33,7 @@ class AbstractIdentifiableHolder(Generic[_IT], ABC):
         raise NotImplementedError
 
 
-class IdentifiableHolder(AbstractIdentifiableHolder, Generic[_IT]):
+class IdentifiableHolder(AbstractIdentifiableHolder[_IT]):
     def __init__(self) -> None:
         self._items: Holder[_IT] = Holder()
 

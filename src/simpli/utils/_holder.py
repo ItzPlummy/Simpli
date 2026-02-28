@@ -32,7 +32,7 @@ class AbstractHolder(Generic[_T], ABC):
         raise NotImplementedError
 
 
-class Holder(AbstractHolder, Generic[_T]):
+class Holder(AbstractHolder[_T]):
     __slots__ = (
         "_items",
         "_ids",

@@ -6,7 +6,7 @@ from simpli.interfaces import AppDependant
 from simpli.systems import System
 from simpli.utils import IdentifiableHolder
 
-_TS = TypeVar('_TS', bound=System)
+_ST = TypeVar("_ST", bound=System)
 
 if TYPE_CHECKING:
     from simpli import Simpli
@@ -16,11 +16,11 @@ else:
 
 class AbstractSystemHolder(AppDependant, ABC):
     @abstractmethod
-    def add(self, *systems: Type[_TS]) -> None:
+    def add(self, *systems: Type[System]) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def by_system(self, system_type: Type[_TS]) -> Iterable[_TS]:
+    def by_system(self, system_type: Type[_ST]) -> Iterable[_ST]:
         raise NotImplementedError
 
     def __init__(self, *, app: Simpli) -> None:
@@ -34,14 +34,14 @@ class AbstractSystemHolder(AppDependant, ABC):
 class SystemHolder(AbstractSystemHolder):
     def __init__(self, *, app: Simpli) -> None:
         super().__init__(app=app)
-        self._systems: Dict[str, IdentifiableHolder[_TS]] = defaultdict(IdentifiableHolder)
+        self._systems: Dict[str, IdentifiableHolder[_ST]] = defaultdict(IdentifiableHolder)
 
-    def add(self, *systems: Type[_TS]) -> None:
+    def add(self, *systems: Type[System]) -> None:
         for system in systems:
             self._add(system)
 
-    def _add(self, system: Type[_TS]) -> None:
+    def _add(self, system: Type[_ST]) -> None:
         self._systems[system.system_tag()].add(system(self._app))
 
-    def by_system(self, system_type: Type[_TS]) -> Iterable[_TS]:
+    def by_system(self, system_type: Type[_ST]) -> Iterable[_ST]:
         return self._systems[system_type.system_tag()].__iter__()

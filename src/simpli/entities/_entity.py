@@ -17,6 +17,11 @@ _AET = TypeVar("_AET", bound="AbstractEntity")
 class AbstractEntity(AppDependant, ArchetypedIdentifiable[Component], ABC):
     @property
     @abstractmethod
+    def name(self) -> str | None:
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
     def parent(self) -> Optional['AbstractEntity']:
         raise NotImplementedError
 
@@ -30,7 +35,7 @@ class AbstractEntity(AppDependant, ArchetypedIdentifiable[Component], ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def set_child(self, child: 'AbstractEntity') -> 'AbstractEntity':
+    def set_child(self, child: _AET) -> _AET:
         raise NotImplementedError
 
     @abstractmethod
@@ -50,11 +55,11 @@ class AbstractEntity(AppDependant, ArchetypedIdentifiable[Component], ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def has_component(self, component_type: Type[_CT]) -> bool:
+    def has_component(self, component_type: Type[Component]) -> bool:
         raise NotImplementedError
 
     @abstractmethod
-    def remove_component(self, component_type: Type[_CT]) -> None:
+    def remove_component(self, component_type: Type[Component]) -> None:
         raise NotImplementedError
 
     @abstractmethod
@@ -166,10 +171,10 @@ class Entity(AbstractEntity):
         except KeyError:
             raise KeyError(f"Component \"{component_type.tag()}\" was not found")
 
-    def has_component(self, component_type: Type[_CT]) -> bool:
+    def has_component(self, component_type: Type[Component]) -> bool:
         return component_type.tag() in self._components
 
-    def remove_component(self, component_type: Type[_CT]) -> None:
+    def remove_component(self, component_type: Type[Component]) -> None:
         try:
             self._components.pop(component_type.tag())
         except KeyError:

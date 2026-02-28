@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, TYPE_CHECKING, TypeAlias, Callable, TypeVar
+from typing import Any, TYPE_CHECKING
 
 from simpli.enums import LayerGroup
 from simpli.interfaces import AppDependant, Identifiable
@@ -9,9 +9,6 @@ if TYPE_CHECKING:
     from simpli import Simpli
 else:
     Simpli = Any
-
-_T = TypeVar('_T', bound=object)
-_EntityAttributeGetter: TypeAlias = Callable[[], _T]
 
 
 @dataclass(kw_only=True, slots=True)

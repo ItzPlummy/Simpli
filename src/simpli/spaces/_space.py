@@ -1,17 +1,30 @@
 from abc import ABC, abstractmethod
 
 from simpli.resources import ResourceHolder
+from simpli.systems import SystemHolder
 
 
 class Space(ABC):
+    @property
+    @abstractmethod
+    def systems(self) -> SystemHolder:
+        ...
+
     @property
     @abstractmethod
     def resources(self) -> ResourceHolder:
         ...
 
     @abstractmethod
-    def step(
+    def on_tick(
             self,
             delta: int | float,
+    ) -> None:
+        ...
+
+    @abstractmethod
+    def on_frame(
+            self,
+            alpha: int | float,
     ) -> None:
         ...

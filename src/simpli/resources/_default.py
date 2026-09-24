@@ -6,14 +6,26 @@ class DefaultResourceHolder(ResourceHolder):
     def __init__(self) -> None:
         self._resources: dict[str, Resource] = {}
 
-    def add(self, resource: Resource) -> None:
+    def add(
+            self,
+            resource: Resource,
+    ) -> None:
         self._resources[resource.tag()] = resource
 
-    def get(self, resource_tag: str) -> Resource | None:
-        return self._resources.get(resource_tag)
+    def get[T: Resource](
+            self,
+            resource: type[T]
+    ) -> T | None:
+        return self._resources.get(resource.tag())
 
-    def has(self, resource_tag: str) -> bool:
-        return resource_tag in self._resources
+    def has(
+            self,
+            resource: type[Resource]
+    ) -> bool:
+        return resource.tag() in self._resources
 
-    def remove(self, resource_tag: str) -> None:
-        self._resources.pop(resource_tag, None)
+    def remove(
+            self,
+            resource: type[Resource],
+    ) -> None:
+        self._resources.pop(resource.tag(), None)

@@ -77,7 +77,7 @@ class DefaultCounter(Counter):
         self._tick()
 
     def _tick(self) -> None:
-        self._space.step(self.time.delta)
+        self._space.on_tick(self.time.delta)
         self.time.tick += 1
         self.time.simulation_time += self.time.delta
 

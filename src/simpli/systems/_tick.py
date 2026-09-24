@@ -1,0 +1,23 @@
+from abc import ABC, abstractmethod
+from typing import TYPE_CHECKING, Any
+
+from simpli.systems._system import System
+
+if TYPE_CHECKING:
+    from simpli.spaces import Space
+else:
+    Space = Any
+
+
+class TickSystem(System, ABC):
+    @classmethod
+    def kind(cls) -> str:
+        return "tick"
+
+    @abstractmethod
+    def on_tick(
+            self,
+            space: Space,
+            delta: int | float,
+    ) -> None:
+        ...

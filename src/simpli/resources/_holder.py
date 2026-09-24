@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Any
 
 from simpli.resources._resource import Resource
 
@@ -13,34 +12,34 @@ class ResourceHolder(ABC):
         ...
 
     @abstractmethod
-    def get(
+    def get[T: Resource](
             self,
-            resource_tag: str,
-    ) -> Resource | None:
+            resource: type[T]
+    ) -> T | None:
         ...
 
     @abstractmethod
     def has(
             self,
-            resource_tag: str,
+            resource: type[Resource],
     ) -> bool:
         ...
 
     @abstractmethod
     def remove(
             self,
-            resource_tag: str,
+            resource: type[Resource],
     ) -> None:
         ...
 
     def __getitem__(
             self,
-            item: Any,
+            resource: type[Resource],
     ) -> Resource | None:
-        return self.get(str(item))
+        return self.get(resource)
 
     def __contains__(
             self,
-            item: Any,
+            resource: type[Resource],
     ) -> bool:
-        return self.has(str(item))
+        return self.has(resource)

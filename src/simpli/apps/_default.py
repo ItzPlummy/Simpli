@@ -71,6 +71,7 @@ class Simpli(App):
             return
 
         alpha = self.counter.advance(delta)
+        self.space.on_frame(alpha)
         self.window.draw(delta)
 
     def _on_draw(self) -> None:

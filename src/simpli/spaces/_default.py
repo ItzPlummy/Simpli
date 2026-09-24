@@ -1,3 +1,4 @@
+from simpli.entities import EntityHolder, DefaultEntityHolder
 from simpli.resources import ResourceHolder, DefaultResourceHolder
 from simpli.spaces._space import Space
 from simpli.systems import SystemHolder, DefaultSystemHolder, TickSystem, FrameSystem
@@ -5,8 +6,13 @@ from simpli.systems import SystemHolder, DefaultSystemHolder, TickSystem, FrameS
 
 class DefaultSpace(Space):
     def __init__(self) -> None:
+        self._entities: EntityHolder = DefaultEntityHolder(self)
         self._systems: SystemHolder = DefaultSystemHolder()
         self._resources: ResourceHolder = DefaultResourceHolder()
+
+    @property
+    def entities(self) -> EntityHolder:
+        return self._entities
 
     @property
     def systems(self) -> SystemHolder:
@@ -22,6 +28,8 @@ class DefaultSpace(Space):
     ) -> None:
         for system in self.systems.of_kind(TickSystem):
             system.on_tick(self, delta)
+
+        self.entities.flush()
 
     def on_frame(
             self,

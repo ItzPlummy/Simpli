@@ -1,10 +1,16 @@
 from abc import ABC, abstractmethod
 
+from simpli.entities import EntityHolder
 from simpli.resources import ResourceHolder
 from simpli.systems import SystemHolder
 
 
 class Space(ABC):
+    @property
+    @abstractmethod
+    def entities(self) -> EntityHolder:
+        ...
+
     @property
     @abstractmethod
     def systems(self) -> SystemHolder:

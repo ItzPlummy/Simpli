@@ -1,5 +1,3 @@
-from typing import Dict
-
 from pyglet.gl import glClearColor
 from pyglet.graphics import Batch, Group
 from pyglet.window import Window
@@ -16,7 +14,7 @@ class DefaultRenderer(Renderer):
         self._clear_color = clear_color
 
         self._batch = Batch()
-        self._layers: Dict[int, Group] = {}
+        self._layers: dict[int, Group] = {}
 
     def draw(
             self,

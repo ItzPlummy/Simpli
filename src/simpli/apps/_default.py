@@ -1,5 +1,5 @@
 from pyglet import app
-from pyglet.clock import unschedule, schedule, schedule_interval
+from pyglet.clock import unschedule, schedule_interval
 from pyglet.window import Window
 
 from simpli.apps import App
@@ -20,7 +20,7 @@ class Simpli(App):
             fps: Resolvable[int | float] | None = None,
     ) -> None:
         self._title: str = title or "Simpli"
-        self._window = Window(width, height, title, resizable=True, vsync=True)
+        self._window = Window(width or 800, height or 600, self._title, resizable=True, vsync=True)
 
         self._space: Space = DefaultSpace()
         self._renderer: Renderer = DefaultRenderer(Color.black())
@@ -52,6 +52,7 @@ class Simpli(App):
 
     def start(self) -> None:
         self._schedule()
+
         try:
             app.run(None)
         finally:
@@ -62,14 +63,11 @@ class Simpli(App):
 
     def _schedule(self) -> None:
         unschedule(self._frame)
-
-        if self.counter.fps == 0:
-            schedule(self._frame)
-        else:
-            schedule_interval(self._frame, 1 / self.counter.fps)
+        schedule_interval(self._frame, 1 / self.counter.fps)
 
     def _frame(self, delta: int | float) -> None:
         if self.window.has_exit:
+            unschedule(self._frame)
             return
 
         alpha = self.counter.advance(delta)

@@ -27,7 +27,7 @@ class Counter(ABC):
 
     @property
     @abstractmethod
-    def time_scale(self) -> Resolvable[int | float]:
+    def time_scale(self) -> int | float:
         ...
 
     @time_scale.setter

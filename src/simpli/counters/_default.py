@@ -21,6 +21,8 @@ class DefaultCounter(Counter):
         self._time: Time = Time(0, 1 / self.tps, 0, 0)
         self._accumulator: int | float = 0
 
+        self._space.resources.add(self.time)
+
     @property
     def tps(self) -> int | float:
         return self._resolve_positive_float(self._tps)
@@ -38,7 +40,7 @@ class DefaultCounter(Counter):
         self._fps = fps if callable(fps) else self._resolve_positive_float(fps)
 
     @property
-    def time_scale(self) -> Resolvable[int | float]:
+    def time_scale(self) -> int | float:
         return self._resolve_positive_float(self._time_scale)
 
     @time_scale.setter

@@ -3,4 +3,4 @@ from simpli.utils._consumer import Consumer
 from simpli.utils._resolvable import Resolvable, resolve
 from simpli.utils._supplier import Supplier
 
-__all__ = [Color, Consumer, Resolvable, resolve, Supplier]
+__all__ = ["Color", "Consumer", "Resolvable", "resolve", "Supplier"]

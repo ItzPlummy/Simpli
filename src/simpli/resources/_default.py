@@ -1,14 +1,10 @@
-from typing import Dict
-
 from simpli.resources._holder import ResourceHolder
 from simpli.resources._resource import Resource
 
 
 class DefaultResourceHolder(ResourceHolder):
-    __slots__ = ("_resources",)
-
     def __init__(self) -> None:
-        self._resources: Dict[str, Resource] = {}
+        self._resources: dict[str, Resource] = {}
 
     def add(self, resource: Resource) -> None:
         self._resources[resource.tag()] = resource
@@ -20,4 +16,4 @@ class DefaultResourceHolder(ResourceHolder):
         return resource_tag in self._resources
 
     def remove(self, resource_tag: str) -> None:
-        self._resources.pop(resource_tag)
+        self._resources.pop(resource_tag, None)

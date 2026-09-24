@@ -1,12 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Never
 
 from pyglet.window import Window
 
 from simpli.counters import Counter
 from simpli.renderers import Renderer
 from simpli.spaces import Space
-from simpli.utils import Resolvable
 
 
 class App(ABC):

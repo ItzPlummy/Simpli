@@ -1,6 +1,7 @@
 from typing import Self
 
 from simpli.utils._resolvable import Resolvable, resolve
+from simpli.utils._supplier import Supplier
 
 type _InitColor = Resolvable[int | float] | None
 
@@ -13,10 +14,10 @@ class Color:
             blue: _InitColor = None,
             alpha: _InitColor = None,
     ) -> None:
-        self._red: Resolvable[int | float] = red if callable(red) else self._resolve_color_float(red or 0)
-        self._green: Resolvable[int | float] = green if callable(green) else self._resolve_color_float(green or 0)
-        self._blue: Resolvable[int | float] = blue if callable(blue) else self._resolve_color_float(blue or 0)
-        self._alpha: Resolvable[int | float] = alpha if callable(alpha) else self._resolve_color_float(1 if alpha is None else alpha)
+        self._red: Resolvable[int | float] = red if isinstance(red, Supplier) else self._resolve_color_float(red or 0)
+        self._green: Resolvable[int | float] = green if isinstance(green, Supplier) else self._resolve_color_float(green or 0)
+        self._blue: Resolvable[int | float] = blue if isinstance(blue, Supplier) else self._resolve_color_float(blue or 0)
+        self._alpha: Resolvable[int | float] = alpha if isinstance(alpha, Supplier) else self._resolve_color_float(1 if alpha is None else alpha)
 
     @classmethod
     def white(cls) -> Self:

@@ -5,4 +5,4 @@ type Resolvable[T] = T | Supplier[T]
 
 
 def resolve[T](resolvable: Resolvable[T]) -> T:
-    return resolvable() if callable(resolvable) else resolvable
+    return resolvable() if isinstance(resolvable, Supplier) else resolvable

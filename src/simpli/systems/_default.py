@@ -18,11 +18,20 @@ class DefaultSystemHolder(SystemHolder):
     def get[T: System](
             self,
             system: type[T],
-    ) -> T | None:
-        if system.kind() not in self._systems:
-            return None
+    ) -> T:
+        try:
+            return self._systems[system.kind()][system.tag()]
+        except KeyError:
+            raise RuntimeError(f"Unable to get system")
 
-        return self._systems[system.kind()].get(system.tag())
+    def find[T: System](
+            self,
+            system: type[T],
+    ) -> T | None:
+        try:
+            return self._systems[system.kind()][system.tag()]
+        except KeyError:
+            return None
 
     def has(
             self,

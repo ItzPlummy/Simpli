@@ -23,7 +23,7 @@ class Simpli(App):
         self._window = Window(width or 1280, height or 720, self._title, resizable=True, vsync=True)
 
         self._space: Space = DefaultSpace()
-        self._renderer: Renderer = DefaultRenderer(Color.black())
+        self._renderer: Renderer = DefaultRenderer(Color.oat())
         self._counter: Counter = DefaultCounter(self.space, tps, fps)
 
         self.space.resources.add(self.renderer)

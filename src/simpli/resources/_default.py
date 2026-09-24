@@ -15,8 +15,20 @@ class DefaultResourceHolder(ResourceHolder):
     def get[T: Resource](
             self,
             resource: type[T]
+    ) -> T:
+        try:
+            return self._resources[resource.tag()]
+        except KeyError:
+            raise RuntimeError("Unable to get resource")
+
+    def find[T: Resource](
+            self,
+            resource: type[T]
     ) -> T | None:
-        return self._resources.get(resource.tag())
+        try:
+            return self._resources[resource.tag()]
+        except KeyError:
+            return None
 
     def has(
             self,

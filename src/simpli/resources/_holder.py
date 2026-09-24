@@ -15,6 +15,13 @@ class ResourceHolder(ABC):
     def get[T: Resource](
             self,
             resource: type[T]
+    ) -> T:
+        ...
+
+    @abstractmethod
+    def find[T: Resource](
+            self,
+            resource: type[T]
     ) -> T | None:
         ...
 

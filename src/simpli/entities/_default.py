@@ -1,11 +1,15 @@
 from collections import defaultdict
 from itertools import count
-from typing import Iterable
+from typing import Iterable, TYPE_CHECKING, Any
 
 from simpli.components import Component
 from simpli.entities._entity import Entity
 from simpli.entities._holder import EntityHolder
-from simpli.spaces import Space
+
+if TYPE_CHECKING:
+    from simpli.spaces import Space
+else:
+    Space = Any
 
 
 class DefaultEntity(Entity):
@@ -38,8 +42,14 @@ class DefaultEntity(Entity):
     def get[T: Component](
             self,
             component: type[T],
-    ) -> T | None:
+    ) -> T:
         return self.space.entities.get_component(self._id, component)
+
+    def find[T: Component](
+            self,
+            component: type[T],
+    ) -> T | None:
+        return self.space.entities.find_component(self._id, component)
 
     def has(
             self,
@@ -64,7 +74,7 @@ class DefaultEntityHolder(EntityHolder):
     ) -> None:
         self._space: Space = space
 
-        self._ids: count[int] = count[int](1)
+        self._ids: count[int] = count(1)
         self._entities: dict[int, set[type[Component]]] = defaultdict[int, set[type[Component]]](set)
         self._components: dict[type[Component], dict[int, Component]] = defaultdict[type[Component], dict[int, Component]](dict)
         self._destroyed: set[int] = set()
@@ -77,7 +87,7 @@ class DefaultEntityHolder(EntityHolder):
 
         for _ in range(10):
             entity_id = next(self._ids)
-            if self.has(entity_id): break
+            if not self.has(entity_id): break
         else:
             raise RuntimeError("Unable to create entity")
 
@@ -93,6 +103,12 @@ class DefaultEntityHolder(EntityHolder):
             entity_id: int,
     ) -> Entity:
         return DefaultEntity(entity_id, self._space)
+
+    def find(
+            self,
+            entity_id: int,
+    ) -> Entity | None:
+        return None if not self.has(entity_id) else DefaultEntity(entity_id, self._space)
 
     def has(
             self,
@@ -124,8 +140,21 @@ class DefaultEntityHolder(EntityHolder):
             self,
             entity_id: int,
             component: type[T],
+    ) -> T:
+        try:
+            return self._components[component][entity_id]
+        except KeyError:
+            raise RuntimeError("Unable to get component from entity")
+
+    def find_component[T: Component](
+            self,
+            entity_id: int,
+            component: type[T],
     ) -> T | None:
-        return self._components[component].get(entity_id)
+        try:
+            return self._components[component][entity_id]
+        except KeyError:
+            return None
 
     def get_components(
             self,

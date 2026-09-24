@@ -28,6 +28,10 @@ class Color:
         return cls(0, 0, 0)
 
     @classmethod
+    def oat(cls) -> Self:
+        return cls(0.975, 0.945, 0.88)
+
+    @classmethod
     def from_tuple(
             cls,
             color_tuple: tuple[_InitColor, _InitColor, _InitColor, _InitColor],

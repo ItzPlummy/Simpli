@@ -36,6 +36,13 @@ class Entity(ABC):
     def get[T](
             self,
             component: type[T],
+    ) -> T:
+        ...
+
+    @abstractmethod
+    def find[T](
+            self,
+            component: type[T],
     ) -> T | None:
         ...
 

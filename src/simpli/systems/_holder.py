@@ -16,6 +16,13 @@ class SystemHolder(ABC):
     def get[T: System](
             self,
             system: type[T],
+    ) -> T:
+        ...
+
+    @abstractmethod
+    def find[T: System](
+            self,
+            system: type[T],
     ) -> T | None:
         ...
 

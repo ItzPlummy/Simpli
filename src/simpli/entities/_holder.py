@@ -21,6 +21,13 @@ class EntityHolder(ABC):
         ...
 
     @abstractmethod
+    def find(
+            self,
+            entity_id: int,
+    ) -> Entity | None:
+        ...
+
+    @abstractmethod
     def has(
             self,
             entity_id: int,
@@ -51,6 +58,14 @@ class EntityHolder(ABC):
 
     @abstractmethod
     def get_component[T: Component](
+            self,
+            entity_id: int,
+            component: type[T],
+    ) -> T:
+        ...
+
+    @abstractmethod
+    def find_component[T: Component](
             self,
             entity_id: int,
             component: type[T],

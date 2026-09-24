@@ -1,8 +1,12 @@
-from simpli import hello
+from simpli import Simpli
+
+
+class Example(Simpli):
+    ...
 
 
 def main() -> None:
-    print(hello())
+    Example().start()
 
 
 if __name__ == '__main__':

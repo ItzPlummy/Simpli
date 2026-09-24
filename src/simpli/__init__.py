@@ -1,2 +1,4 @@
-def hello() -> str:
-    return "Hello from simpli!"
+from simpli.apps import Simpli
+
+
+__all__ = [Simpli]

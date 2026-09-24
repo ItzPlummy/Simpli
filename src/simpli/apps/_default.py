@@ -20,7 +20,7 @@ class Simpli(App):
             fps: Resolvable[int | float] | None = None,
     ) -> None:
         self._title: str = title or "Simpli"
-        self._window = Window(width or 800, height or 600, self._title, resizable=True, vsync=True)
+        self._window = Window(width or 1280, height or 720, self._title, resizable=True, vsync=True)
 
         self._space: Space = DefaultSpace()
         self._renderer: Renderer = DefaultRenderer(Color.black())

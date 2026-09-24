@@ -18,7 +18,7 @@ class DefaultCounter(Counter):
         self._time_scale: Resolvable[int | float] = 1.0
         self._is_paused: Resolvable[bool] = False
 
-        self._time: Time = Time(0, 0, 1 / self.tps, 0)
+        self._time: Time = Time(0, 1 / self.tps, 0, 0)
         self._accumulator: int | float = 0
 
     @property

@@ -28,6 +28,8 @@ class Simpli(App):
 
         self.space.resources.add(self.renderer)
 
+        self.window.push_handlers(on_draw=self._on_draw)
+
     @property
     def title(self) -> str:
         return self._title

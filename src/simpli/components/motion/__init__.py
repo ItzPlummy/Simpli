@@ -1,7 +1,7 @@
-from simpli.components.motion._position import Position
-from simpli.components.motion._velocity import Velocity
+from simpli.components.motion._position import PositionComponent
+from simpli.components.motion._velocity import VelocityComponent
 
 __all__ = [
-    "Position",
-    "Velocity",
+    "PositionComponent",
+    "VelocityComponent",
 ]

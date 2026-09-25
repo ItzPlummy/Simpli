@@ -1,5 +1,5 @@
 from simpli import Simpli
-from simpli.components.motion import Position, Velocity
+from simpli.components.motion import PositionComponent, VelocityComponent
 from simpli.systems.motion import VelocitySystem
 from simpli.utils import Vector
 
@@ -12,10 +12,10 @@ def main() -> None:
     e = Example()
     e.space.systems.add(VelocitySystem())
     e.space.entities.create(
-        Position(
+        PositionComponent(
             position=Vector.zero()
         ),
-        Velocity(
+        VelocityComponent(
             velocity=Vector(1, 0),
         )
     )

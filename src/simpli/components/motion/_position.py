@@ -2,5 +2,5 @@ from simpli.components import Component
 from simpli.utils import Vector
 
 
-class Position(Component):
+class PositionComponent(Component):
     position: Vector

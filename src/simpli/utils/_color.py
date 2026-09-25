@@ -27,6 +27,10 @@ class Color:
         return cls(0, 0, 0)
 
     @classmethod
+    def shadow(cls) -> Self:
+        return cls(0.1, 0.1, 0.1, 0.15)
+
+    @classmethod
     def oat(cls) -> Self:
         return cls(0.975, 0.945, 0.88)
 

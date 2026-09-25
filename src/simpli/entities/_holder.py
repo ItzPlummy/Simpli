@@ -1,9 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import Iterable
+from typing import Iterable, TYPE_CHECKING, Any
 
 from simpli.components import Component
-from simpli.components.collections import ComponentCollection
 from simpli.entities._entity import Entity
+
+if TYPE_CHECKING:
+    from simpli.structures import Structure
+else:
+    Structure = Any
 
 
 class EntityHolder(ABC):
@@ -15,9 +19,9 @@ class EntityHolder(ABC):
         ...
 
     @abstractmethod
-    def create_collection(
+    def place(
             self,
-            collection: ComponentCollection,
+            structure: Structure,
     ) -> Entity:
         ...
 

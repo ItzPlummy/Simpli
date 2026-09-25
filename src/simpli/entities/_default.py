@@ -3,14 +3,15 @@ from itertools import count
 from typing import Iterable, TYPE_CHECKING, Any
 
 from simpli.components import Component
-from simpli.components.collections import ComponentCollection
 from simpli.entities._entity import Entity
 from simpli.entities._holder import EntityHolder
 
 if TYPE_CHECKING:
     from simpli.spaces import Space
+    from simpli.structures import Structure
 else:
     Space = Any
+    Structure = Any
 
 
 class DefaultEntity(Entity):
@@ -133,11 +134,11 @@ class DefaultEntityHolder(EntityHolder):
 
         return DefaultEntity(entity_id, self._space)
 
-    def create_collection(
+    def place(
             self,
-            collection: ComponentCollection,
+            structure: Structure,
     ) -> Entity:
-        return self.create(*collection())
+        return structure.place(self._space)
 
     def get(
             self,

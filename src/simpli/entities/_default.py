@@ -168,6 +168,9 @@ class DefaultEntityHolder(EntityHolder):
             self,
             entity_id: int,
     ) -> None:
+        for child in self.get_children(entity_id):
+            self._destroyed.add(child.id)
+
         self._destroyed.add(entity_id)
 
     def add_component(
@@ -249,9 +252,6 @@ class DefaultEntityHolder(EntityHolder):
             for component in components:
                 self._entities[component].pop(entity_id, None)
 
-            for child in self.get_children(entity_id):
-                self.detach(child.id)
-
             self.detach(entity_id)
 
         self._destroyed.clear()
@@ -288,6 +288,11 @@ class DefaultEntityHolder(EntityHolder):
 
         if parent_id is not None:
             self._children[parent_id].discard(child_id)
+
+    @property
+    def all(self) -> Iterable[Entity]:
+        for entity_id in self._components:
+            yield DefaultEntity(entity_id, self._space)
 
     @property
     def count(self) -> int:

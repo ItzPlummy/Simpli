@@ -172,5 +172,16 @@ class EntityHolder(ABC):
 
     @property
     @abstractmethod
+    def all(self) -> Iterable[Entity]:
+        ...
+
+    @property
+    @abstractmethod
     def count(self) -> int:
         ...
+
+    def __iter__(self) -> Iterable[Entity]:
+        return self.all
+
+    def __len__(self) -> int:
+        return self.count

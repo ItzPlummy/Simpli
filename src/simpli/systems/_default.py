@@ -7,20 +7,25 @@ from simpli.systems._holder import SystemHolder
 
 class DefaultSystemHolder(SystemHolder):
     def __init__(self) -> None:
-        self._systems: dict[str, dict[str, System]] = defaultdict[str, dict[str, System]](dict)
+        self._systems: dict[type[System], System] = {}
+        self._kinds: dict[type[System], dict[type[System], System]] = defaultdict[type[System], dict[type[System], System]](dict)
 
     def add(
             self,
             system: System,
     ) -> None:
-        self._systems[system.kind()][system.tag()] = system
+        self._systems[type(system)] = system
+
+        for kind in System.get_kinds():
+            if isinstance(system, kind):
+                self._kinds[kind][type(system)] = system
 
     def get[T: System](
             self,
             system: type[T],
     ) -> T:
         try:
-            return self._systems[system.kind()][system.tag()]
+            return self._systems[system]
         except KeyError:
             raise RuntimeError(f"Unable to get system")
 
@@ -29,7 +34,7 @@ class DefaultSystemHolder(SystemHolder):
             system: type[T],
     ) -> T | None:
         try:
-            return self._systems[system.kind()][system.tag()]
+            return self._systems[system]
         except KeyError:
             return None
 
@@ -37,23 +42,20 @@ class DefaultSystemHolder(SystemHolder):
             self,
             system: type[System],
     ) -> bool:
-        if system.kind() not in self._systems:
-            return False
-
-        return system.tag() in self._systems[system.kind()]
+        return system in self._systems
 
     def remove(
             self,
             system: type[System],
     ) -> None:
-        if system.kind() in self._systems:
-            self._systems[system.kind()].pop(system.tag(), None)
+        self._systems.pop(system, None)
+
+        for kind in System.get_kinds():
+            if isinstance(system, kind):
+                self._kinds[kind].pop(system, None)
 
     def of_kind[T: System](
             self,
             system: type[T],
     ) -> Iterable[T]:
-        if system.kind() not in self._systems:
-            return []
-
-        return self._systems[system.kind()].values()
+        return self._kinds[system].values()

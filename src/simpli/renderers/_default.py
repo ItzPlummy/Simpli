@@ -16,6 +16,10 @@ class DefaultRenderer(Renderer):
         self._batch = Batch()
         self._layers: dict[int, Group] = {}
 
+    @property
+    def batch(self) -> Batch:
+        return self._batch
+
     def draw(
             self,
             window: Window,

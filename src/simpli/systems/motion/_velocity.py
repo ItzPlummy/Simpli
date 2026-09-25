@@ -4,10 +4,6 @@ from simpli.systems import TickSystem
 
 
 class VelocitySystem(TickSystem):
-    @classmethod
-    def tag(cls) -> str:
-        return "velocity"
-
     def on_tick(
             self,
             space: Space,

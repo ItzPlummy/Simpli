@@ -1,3 +1,4 @@
+from itertools import chain
 from typing import Iterable
 
 from pyglet import app
@@ -9,10 +10,17 @@ from simpli.counters import DefaultCounter, Counter
 from simpli.renderers import Renderer, DefaultRenderer
 from simpli.spaces import Space, DefaultSpace
 from simpli.systems import System
+from simpli.systems.motion import VelocitySystem
+from simpli.systems.render.shape import CircleRenderSystem
 from simpli.utils import Resolvable, Color
 
 
 class Simpli(App):
+    _DEFAULT_SYSTEMS: Iterable[System] = [
+        VelocitySystem(),
+        CircleRenderSystem(),
+    ]
+
     SYSTEMS: Iterable[System] = []
 
     def __init__(
@@ -56,7 +64,7 @@ class Simpli(App):
         return self._window
 
     def start(self) -> None:
-        for system in self.SYSTEMS:
+        for system in chain(self._DEFAULT_SYSTEMS, self.SYSTEMS):
             self.space.systems.add(system)
 
         self.space.on_start()

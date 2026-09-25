@@ -9,11 +9,7 @@ else:
     Space = Any
 
 
-class FrameSystem(System, ABC):
-    @classmethod
-    def kind(cls) -> str:
-        return "frame"
-
+class FrameSystem(System, ABC, is_kind=True):
     @abstractmethod
     def on_frame(
             self,

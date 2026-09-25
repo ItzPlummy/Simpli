@@ -9,11 +9,7 @@ else:
     Space = Any
 
 
-class TickSystem(System, ABC):
-    @classmethod
-    def kind(cls) -> str:
-        return "tick"
-
+class TickSystem(System, ABC, is_kind=True):
     @abstractmethod
     def on_tick(
             self,

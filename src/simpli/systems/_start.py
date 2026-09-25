@@ -9,11 +9,7 @@ else:
     Space = Any
 
 
-class StartSystem(System, ABC):
-    @classmethod
-    def kind(cls) -> str:
-        return "start"
-
+class StartSystem(System, ABC, is_kind=True):
     @abstractmethod
     def on_start(
             self,

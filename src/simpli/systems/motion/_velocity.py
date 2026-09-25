@@ -1,6 +1,7 @@
 from simpli.components.motion import PositionComponent, VelocityComponent
 from simpli.spaces import Space
 from simpli.systems import TickSystem
+from simpli.utils import Supplier
 
 
 class VelocitySystem(TickSystem):
@@ -10,4 +11,9 @@ class VelocitySystem(TickSystem):
             delta: int | float,
     ) -> None:
         for entity in space.entities.by_components(PositionComponent, VelocityComponent):
-            entity.get(PositionComponent).position += entity.get(VelocityComponent).velocity * delta
+            position: PositionComponent = entity.get(PositionComponent)
+
+            if isinstance(position.position, Supplier):
+                continue
+
+            position.position += entity.get(VelocityComponent).velocity * delta

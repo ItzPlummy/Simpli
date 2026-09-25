@@ -3,6 +3,7 @@ from pyglet.shapes import Circle
 
 from simpli.components.visual.shape import CircleComponent
 from simpli.systems.render.shape._shape import ShapeRenderSystem
+from simpli.utils import resolve
 
 
 class CircleRenderSystem(ShapeRenderSystem[CircleComponent, Circle]):
@@ -12,12 +13,20 @@ class CircleRenderSystem(ShapeRenderSystem[CircleComponent, Circle]):
             batch: Batch,
             group: Group,
     ) -> Circle:
-        return Circle(0, 0, shape.radius, batch=batch, group=group)
+        return Circle(
+            0,
+            0,
+            resolve(shape.radius),
+            batch=batch,
+            group=group,
+        )
 
     def update(
             self,
             base: Circle,
             shape: CircleComponent,
     ) -> None:
-        if base.radius != shape.radius:
-            base.radius = shape.radius
+        radius: int | float = resolve(shape.radius)
+
+        if base.radius != radius:
+            base.radius = radius

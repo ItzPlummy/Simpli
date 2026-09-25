@@ -19,9 +19,6 @@ class CircleSpawnSystem(MouseClickSystem):
             screen_position: Vector,
             mouse_button: MouseButton,
     ) -> None:
-        for entity in space.entities:
-            entity.destroy()
-
         space.entities.place(
             Circle(
                 position,
@@ -29,8 +26,6 @@ class CircleSpawnSystem(MouseClickSystem):
                 is_dynamic=True,
             )
         )
-
-        print(f"Entities: {space.entities.count}")
 
 
 class GravityIncreasementSystem(TickSystem):

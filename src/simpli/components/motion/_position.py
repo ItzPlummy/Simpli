@@ -1,6 +1,6 @@
 from simpli.components import Component
-from simpli.utils import Vector
+from simpli.utils import Vector, Resolvable
 
 
 class PositionComponent(Component):
-    position: Vector
+    position: Resolvable[Vector]

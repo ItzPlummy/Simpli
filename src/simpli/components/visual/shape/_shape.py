@@ -1,6 +1,6 @@
 from simpli.components.visual import VisualComponent
-from simpli.utils import Color
+from simpli.utils import Color, Resolvable
 
 
 class ShapeComponent(VisualComponent):
-    color: Color
+    color: Resolvable[Color]

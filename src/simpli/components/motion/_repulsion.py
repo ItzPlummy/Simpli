@@ -1,6 +1,7 @@
 from simpli.components import Component
+from simpli.utils import Resolvable
 
 
 class RepulsionComponent(Component):
-    max_repulsion: int | float
-    max_distance: int | float
+    max_repulsion: Resolvable[int | float]
+    max_distance: Resolvable[int | float]

@@ -1,12 +1,15 @@
 from random import randint
 
 from simpli import Simpli
+from simpli.components.motion import RepulsionComponent, AttractionComponent
+from simpli.components.visual.shape import CircleComponent
+from simpli.entities import Entity
 from simpli.enums import MouseButton
 from simpli.spaces import Space
 from simpli.structures import Circle
 from simpli.systems import MouseClickSystem
-from simpli.systems.motion import AirResistanceSystem, VelocitySystem
-from simpli.utils import Vector
+from simpli.systems.motion import AirResistanceSystem, VelocitySystem, RepulsionSystem, AttractionSystem
+from simpli.utils import Vector, Supplier, resolve
 
 
 class CircleSpawnSystem(MouseClickSystem):
@@ -17,7 +20,7 @@ class CircleSpawnSystem(MouseClickSystem):
             screen_position: Vector,
             mouse_button: MouseButton,
     ) -> None:
-        space.entities.place(
+        entity: Entity = space.entities.place(
             Circle(
                 position,
                 randint(20, 50),
@@ -25,10 +28,27 @@ class CircleSpawnSystem(MouseClickSystem):
             )
         )
 
+        circle: CircleComponent = entity.get(CircleComponent)
+
+        entity.add(
+            RepulsionComponent(
+                max_repulsion=Supplier(lambda: resolve(circle.radius) * 150),
+                max_distance=Supplier(lambda: resolve(circle.radius) * 5),
+            )
+        )
+        entity.add(
+            AttractionComponent(
+                max_attraction=Supplier(lambda: resolve(circle.radius) * 10),
+                max_distance=Supplier(lambda: resolve(circle.radius) * 20),
+            )
+        )
+
 
 class Example(Simpli):
     SYSTEMS = [
         CircleSpawnSystem(),
+        RepulsionSystem(),
+        AttractionSystem(),
         AirResistanceSystem(),
         VelocitySystem(),
     ]

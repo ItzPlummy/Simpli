@@ -53,7 +53,7 @@ class Vector:
         return self.x, self.y
 
     @property
-    def length(self) -> float:
+    def length(self) -> int | float:
         return hypot(self.x, self.y)
 
     @property
@@ -61,7 +61,16 @@ class Vector:
         return self.x * self.x + self.y * self.y
 
     @property
-    def angle(self) -> float:
+    def normalized(self) -> Self:
+        length = self.length
+
+        if length == 0:
+            return self.zero()
+
+        return self.__class__(self.x / length, self.y / length)
+
+    @property
+    def angle(self) -> int | float:
         return atan2(self.y, self.x)
 
     def with_x(
@@ -82,14 +91,6 @@ class Vector:
     ) -> Self:
         return self.from_angle(angle, self.length)
 
-    def normalized(self) -> Self:
-        length = self.length
-
-        if length == 0:
-            return self.zero()
-
-        return self.__class__(self.x / length, self.y / length)
-
     def dot(
             self,
             other: Self,
@@ -105,7 +106,7 @@ class Vector:
     def distance_to(
             self,
             other: Self,
-    ) -> float:
+    ) -> int | float:
         return (other - self).length
 
     def distance_squared_to(
@@ -118,12 +119,12 @@ class Vector:
             self,
             other: Self,
     ) -> Self:
-        return (other - self).normalized()
+        return (other - self).normalized
 
     def angle_to(
             self,
             other: Self,
-    ) -> float:
+    ) -> int | float:
         return atan2(self.cross(other), self.dot(other))
 
     def __add__(

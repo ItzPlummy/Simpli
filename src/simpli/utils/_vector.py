@@ -1,5 +1,6 @@
 from collections.abc import Iterator
-from math import hypot, atan2, cos, sin
+from math import hypot, atan2, cos, sin, pi
+from random import random
 from typing import Self
 
 
@@ -19,6 +20,10 @@ class Vector:
     @classmethod
     def zero(cls) -> Self:
         return cls(0, 0)
+
+    @classmethod
+    def random(cls) -> Self:
+        return cls.from_angle(random() * pi * 2)
 
     @classmethod
     def from_tuple(

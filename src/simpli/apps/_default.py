@@ -1,19 +1,19 @@
 from itertools import chain
-from typing import Iterable
+from typing import Iterable, Any
 
 from pyglet import app
 from pyglet.clock import unschedule, schedule_interval
-from pyglet.math import Mat4, Vec3
+from pyglet.math import Mat4, Vec3, Vec4
 from pyglet.window import Window
 
 from simpli.apps import App
 from simpli.counters import DefaultCounter, Counter
+from simpli.enums import MouseButton
 from simpli.renderers import Renderer, DefaultRenderer
 from simpli.spaces import Space, DefaultSpace
-from simpli.systems import System
-from simpli.systems.motion import VelocitySystem, AirResistanceSystem
+from simpli.systems import System, MouseClickSystem
 from simpli.systems.render.shape import CircleRenderSystem
-from simpli.utils import Resolvable, Color
+from simpli.utils import Resolvable, Color, Vector
 
 
 class Simpli(App):
@@ -24,8 +24,6 @@ class Simpli(App):
     SYSTEMS: Iterable[System] = []
 
     _AFTER_SYSTEMS: Iterable[System] = [
-        AirResistanceSystem(),
-        VelocitySystem(),
         CircleRenderSystem(),
     ]
 
@@ -48,6 +46,7 @@ class Simpli(App):
         self.space.resources.add(self.renderer)
 
         self.window.push_handlers(
+            on_mouse_press=self._on_mouse_click,
             on_draw=self._on_draw,
             on_resize=self._on_resize,
         )
@@ -101,6 +100,17 @@ class Simpli(App):
         alpha = self.counter.advance(delta)
         self.space.on_frame(alpha)
         self.window.draw(delta)
+
+    def _on_mouse_click(
+            self,
+            x: int,
+            y: int,
+            button: int,
+            modifiers: int,
+    ) -> None:
+        for system in self.space.systems.of_kind(MouseClickSystem):
+            world: Any = ~self._window.view @ Vec4(x, y, 0, 1)
+            system.on_mouse_click(self.space, Vector(world.x, world.y), Vector(x, y), MouseButton(button))
 
     def _on_draw(self) -> None:
         self.renderer.draw(self.window)

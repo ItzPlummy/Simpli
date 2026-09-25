@@ -22,6 +22,10 @@ class Space(ABC):
         ...
 
     @abstractmethod
+    def on_start(self) -> None:
+        ...
+
+    @abstractmethod
     def on_tick(
             self,
             delta: int | float,

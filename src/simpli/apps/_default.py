@@ -1,3 +1,5 @@
+from typing import Iterable
+
 from pyglet import app
 from pyglet.clock import unschedule, schedule_interval
 from pyglet.window import Window
@@ -6,10 +8,13 @@ from simpli.apps import App
 from simpli.counters import DefaultCounter, Counter
 from simpli.renderers import Renderer, DefaultRenderer
 from simpli.spaces import Space, DefaultSpace
+from simpli.systems import System
 from simpli.utils import Resolvable, Color
 
 
 class Simpli(App):
+    SYSTEMS: Iterable[System] = []
+
     def __init__(
             self,
             *,
@@ -51,6 +56,10 @@ class Simpli(App):
         return self._window
 
     def start(self) -> None:
+        for system in self.SYSTEMS:
+            self.space.systems.add(system)
+
+        self.space.on_start()
         self._schedule()
 
         try:

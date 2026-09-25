@@ -51,8 +51,7 @@ class Example(Simpli):
 
 
 def main() -> None:
-    example = Example()
-    example.start()
+    Example().start()
 
 
 if __name__ == '__main__':

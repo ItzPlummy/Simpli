@@ -57,6 +57,20 @@ class EntityHolder(ABC):
         ...
 
     @abstractmethod
+    def get_parent(
+            self,
+            entity_id: int,
+    ) -> Entity | None:
+        ...
+
+    @abstractmethod
+    def get_children(
+            self,
+            entity_id: int,
+    ) -> Iterable[Entity]:
+        ...
+
+    @abstractmethod
     def add_component(
             self,
             entity_id: int,

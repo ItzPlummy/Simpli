@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Iterable
 
 from simpli.components import Component
 
@@ -23,6 +23,16 @@ class Entity(ABC):
     @property
     @abstractmethod
     def is_alive(self) -> bool:
+        ...
+
+    @property
+    @abstractmethod
+    def parent(self) -> Entity:
+        ...
+
+    @property
+    @abstractmethod
+    def children(self) -> Iterable[Entity]:
         ...
 
     @abstractmethod

@@ -1,4 +1,4 @@
-from simpli.components.shape._shape import ShapeComponent
+from simpli.components.visual.shape._shape import ShapeComponent
 
 
 class CircleComponent(ShapeComponent):

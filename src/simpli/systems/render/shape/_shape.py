@@ -5,7 +5,7 @@ from pyglet.graphics import Batch, Group
 from pyglet.shapes import ShapeBase
 
 from simpli.components.motion import PositionComponent
-from simpli.components.shape import ShapeComponent
+from simpli.components.visual.shape import ShapeComponent
 from simpli.renderers import Renderer
 from simpli.spaces import Space
 from simpli.systems import FrameSystem, TickSystem

@@ -1,6 +1,6 @@
 from simpli.components.collections._collection import ComponentCollection
 from simpli.components.motion import PositionComponent, VelocityComponent
-from simpli.components.shape import CircleComponent
+from simpli.components.visual.shape import CircleComponent
 from simpli.utils import Vector, Color
 
 

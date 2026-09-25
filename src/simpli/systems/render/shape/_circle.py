@@ -1,7 +1,7 @@
 from pyglet.graphics import Batch, Group
 from pyglet.shapes import Circle
 
-from simpli.components.shape import CircleComponent
+from simpli.components.visual.shape import CircleComponent
 from simpli.systems.render.shape._shape import ShapeRenderSystem
 
 

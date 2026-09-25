@@ -1,7 +1,7 @@
 from random import randint
 
 from simpli import Simpli
-from simpli.components.collections import DynamicCircleEntity
+from simpli.components.collections import CircleEntity
 from simpli.enums import MouseButton
 from simpli.spaces import Space
 from simpli.systems import StartSystem, TickSystem, MouseClickSystem
@@ -25,7 +25,11 @@ class CircleSpawnSystem(MouseClickSystem):
             mouse_button: MouseButton,
     ) -> None:
         space.entities.create_collection(
-            DynamicCircleEntity(position, randint(20, 50))
+            CircleEntity(
+                position,
+                randint(20, 50),
+                is_dynamic=True,
+            ),
         )
 
 

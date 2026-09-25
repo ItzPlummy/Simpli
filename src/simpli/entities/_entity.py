@@ -27,7 +27,7 @@ class Entity(ABC):
 
     @property
     @abstractmethod
-    def parent(self) -> Entity:
+    def parent(self) -> Entity | None:
         ...
 
     @property
@@ -72,4 +72,29 @@ class Entity(ABC):
 
     @abstractmethod
     def destroy(self) -> None:
+        ...
+
+    @abstractmethod
+    def attach_to(
+            self,
+            parent_id: int,
+    ) -> None:
+        ...
+
+    @abstractmethod
+    def detach(self) -> None:
+        ...
+
+    @abstractmethod
+    def attach_children(
+            self,
+            *children: int,
+    ) -> None:
+        ...
+
+    @abstractmethod
+    def detach_child(
+            self,
+            child_id: int,
+    ) -> None:
         ...

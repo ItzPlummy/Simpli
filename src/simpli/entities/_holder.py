@@ -135,6 +135,37 @@ class EntityHolder(ABC):
     def flush(self) -> None:
         ...
 
+    @abstractmethod
+    def attach_to(
+            self,
+            parent_id: int,
+            child_id: int,
+    ) -> None:
+        ...
+
+    @abstractmethod
+    def detach(
+            self,
+            child_id: int,
+    ) -> None:
+        ...
+
+    def attach_children(
+            self,
+            parent_id: int,
+            *children: int,
+    ) -> None:
+        for child_id in children:
+            self.attach_to(parent_id, child_id)
+
+    def detach_child(
+            self,
+            parent_id: int,
+            child_id: int,
+    ) -> None:
+        if self.get_parent(child_id) == parent_id:
+            self.detach(child_id)
+
     @property
     @abstractmethod
     def count(self) -> int:

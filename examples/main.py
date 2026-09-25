@@ -2,13 +2,13 @@ from random import randint
 
 from simpli import Simpli
 from simpli.components.collections import DynamicCircleEntity
-from simpli.components.motion import VelocityComponent, PositionComponent
-from simpli.entities import Entity
 from simpli.enums import MouseButton
 from simpli.spaces import Space
 from simpli.systems import StartSystem, TickSystem, MouseClickSystem
 from simpli.systems.motion import AirResistanceSystem, VelocitySystem, GravitySystem
-from simpli.utils import Vector
+from simpli.utils import Vector, Supplier
+
+_gravity_acceleration: int | float = 0
 
 
 class SetupSystem(StartSystem):
@@ -24,26 +24,19 @@ class CircleSpawnSystem(MouseClickSystem):
             screen_position: Vector,
             mouse_button: MouseButton,
     ) -> None:
-        entity: Entity = space.entities.create_collection(
+        space.entities.create_collection(
             DynamicCircleEntity(position, randint(20, 50))
         )
 
-        entity.get(VelocityComponent).velocity += Vector.random() * 200
 
-
-class BounceSystem(TickSystem):
+class GravityIncreasementSystem(TickSystem):
     def on_tick(
             self,
             space: Space,
             delta: int | float,
     ) -> None:
-        for entity in space.entities.by_components(PositionComponent, VelocityComponent):
-            position: PositionComponent = entity.get(PositionComponent)
-            velocity: VelocityComponent = entity.get(VelocityComponent)
-
-            if position.position.y < -300:
-                position.position = position.position.with_y(-300)
-                velocity.velocity = velocity.velocity.with_y(velocity.velocity.y * -1)
+        global _gravity_acceleration
+        _gravity_acceleration += delta * 1000
 
 
 class DebugSystem(TickSystem):
@@ -59,8 +52,10 @@ class Example(Simpli):
     SYSTEMS = [
         SetupSystem(),
         CircleSpawnSystem(),
-        BounceSystem(),
-        GravitySystem(),
+        GravityIncreasementSystem(),
+        GravitySystem(
+            acceleration=Supplier(lambda: Vector(0, -_gravity_acceleration))
+        ),
         AirResistanceSystem(),
         VelocitySystem(),
         DebugSystem(),

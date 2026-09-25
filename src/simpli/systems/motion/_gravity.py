@@ -5,7 +5,7 @@ from simpli.utils import Resolvable, Vector, resolve, Supplier
 
 
 class GravitySystem(TickSystem):
-    _DEFAULT_ACCELERATION: Vector = Vector(0, -25)
+    _DEFAULT_ACCELERATION: Vector = Vector(0, -2000)
 
     def __init__(
             self,
@@ -25,4 +25,4 @@ class GravitySystem(TickSystem):
             if isinstance(velocity.velocity, Supplier):
                 continue
 
-            velocity.velocity += resolve(self._acceleration)
+            velocity.velocity += resolve(self._acceleration) * delta

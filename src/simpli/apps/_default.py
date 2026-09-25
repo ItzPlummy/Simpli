@@ -16,12 +16,16 @@ from simpli.utils import Resolvable, Color
 
 
 class Simpli(App):
-    _DEFAULT_SYSTEMS: Iterable[System] = [
-        VelocitySystem(),
-        CircleRenderSystem(),
+    _BEFORE_SYSTEMS: Iterable[System] = [
+
     ]
 
     SYSTEMS: Iterable[System] = []
+
+    _AFTER_SYSTEMS: Iterable[System] = [
+        VelocitySystem(),
+        CircleRenderSystem(),
+    ]
 
     def __init__(
             self,
@@ -64,7 +68,7 @@ class Simpli(App):
         return self._window
 
     def start(self) -> None:
-        for system in chain(self._DEFAULT_SYSTEMS, self.SYSTEMS):
+        for system in chain(self._BEFORE_SYSTEMS, self.SYSTEMS, self._AFTER_SYSTEMS):
             self.space.systems.add(system)
 
         self.space.on_start()

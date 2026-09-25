@@ -51,7 +51,7 @@ class DefaultSystemHolder(SystemHolder):
         self._systems.pop(system, None)
 
         for kind in System.get_kinds():
-            if isinstance(system, kind):
+            if issubclass(system, kind):
                 self._kinds[kind].pop(system, None)
 
     def of_kind[T: System](

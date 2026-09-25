@@ -103,5 +103,12 @@ class EntityHolder(ABC):
         ...
 
     @abstractmethod
+    def by_components(
+            self,
+            *components: type[Component],
+    ) -> Iterable[Entity]:
+        ...
+
+    @abstractmethod
     def flush(self) -> None:
         ...

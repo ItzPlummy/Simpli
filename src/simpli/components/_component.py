@@ -1,6 +1,7 @@
 from abc import ABC
 from typing import dataclass_transform, Any
 
+from pydantic import ConfigDict
 from pydantic.dataclasses import dataclass
 
 
@@ -14,7 +15,8 @@ class Component(ABC):
 
         kwargs.update(
             {
-                "kw_only": True
+                "kw_only": True,
+                "config": ConfigDict(arbitrary_types_allowed=True),
             }
         )
 

@@ -188,6 +188,18 @@ class DefaultEntityHolder(EntityHolder):
         for entity_id in self._components[component]:
             yield DefaultEntity(entity_id, self._space)
 
+    def by_components(
+            self,
+            *components: type[Component],
+    ) -> Iterable[Entity]:
+        entities: set[int] = set[int](self._entities.keys())
+
+        for component in components:
+            entities &= self._components[component].keys()
+
+        for entity_id in entities:
+            yield DefaultEntity(entity_id, self._space)
+
     def flush(self) -> None:
         for entity_id in self._destroyed:
             components: set[type[Component]] = self._entities.pop(entity_id, set())

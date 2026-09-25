@@ -215,3 +215,7 @@ class DefaultEntityHolder(EntityHolder):
                 self._components[component].pop(entity_id, None)
 
         self._destroyed.clear()
+
+    @property
+    def count(self) -> int:
+        return len(self._entities)

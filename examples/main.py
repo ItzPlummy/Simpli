@@ -4,16 +4,11 @@ from simpli import Simpli
 from simpli.components.collections import CircleEntity
 from simpli.enums import MouseButton
 from simpli.spaces import Space
-from simpli.systems import StartSystem, TickSystem, MouseClickSystem
+from simpli.systems import TickSystem, MouseClickSystem
 from simpli.systems.motion import AirResistanceSystem, VelocitySystem, GravitySystem
 from simpli.utils import Vector, Supplier
 
 _gravity_acceleration: int | float = 0
-
-
-class SetupSystem(StartSystem):
-    def on_start(self, space: Space) -> None:
-        ...
 
 
 class CircleSpawnSystem(MouseClickSystem):
@@ -49,12 +44,11 @@ class DebugSystem(TickSystem):
             space: Space,
             delta: int | float,
     ) -> None:
-        ...
+        print(f"Total entities: {space.entities.count}")
 
 
 class Example(Simpli):
     SYSTEMS = [
-        SetupSystem(),
         CircleSpawnSystem(),
         GravityIncreasementSystem(),
         GravitySystem(

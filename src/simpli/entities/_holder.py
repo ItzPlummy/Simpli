@@ -120,3 +120,8 @@ class EntityHolder(ABC):
     @abstractmethod
     def flush(self) -> None:
         ...
+
+    @property
+    @abstractmethod
+    def count(self) -> int:
+        ...

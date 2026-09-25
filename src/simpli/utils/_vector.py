@@ -4,6 +4,8 @@ from typing import Self
 
 
 class Vector:
+    _EPSILON: int | float = 0.001
+
     __slots__ = ("_x", "_y")
 
     def __init__(
@@ -11,8 +13,8 @@ class Vector:
             x: int | float,
             y: int | float,
     ) -> None:
-        self._x: int | float = x
-        self._y: int | float = y
+        self._x: int | float = x if abs(x) >= self._EPSILON else 0
+        self._y: int | float = y if abs(y) >= self._EPSILON else 0
 
     @classmethod
     def zero(cls) -> Self:

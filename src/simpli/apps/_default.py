@@ -3,6 +3,7 @@ from typing import Iterable
 
 from pyglet import app
 from pyglet.clock import unschedule, schedule_interval
+from pyglet.math import Mat4, Vec3
 from pyglet.window import Window
 
 from simpli.apps import App
@@ -10,7 +11,7 @@ from simpli.counters import DefaultCounter, Counter
 from simpli.renderers import Renderer, DefaultRenderer
 from simpli.spaces import Space, DefaultSpace
 from simpli.systems import System
-from simpli.systems.motion import VelocitySystem
+from simpli.systems.motion import VelocitySystem, AirResistanceSystem
 from simpli.systems.render.shape import CircleRenderSystem
 from simpli.utils import Resolvable, Color
 
@@ -23,6 +24,7 @@ class Simpli(App):
     SYSTEMS: Iterable[System] = []
 
     _AFTER_SYSTEMS: Iterable[System] = [
+        AirResistanceSystem(),
         VelocitySystem(),
         CircleRenderSystem(),
     ]
@@ -45,7 +47,12 @@ class Simpli(App):
 
         self.space.resources.add(self.renderer)
 
-        self.window.push_handlers(on_draw=self._on_draw)
+        self.window.push_handlers(
+            on_draw=self._on_draw,
+            on_resize=self._on_resize,
+        )
+
+        self._on_resize(self.window.width, self.window.height)
 
     @property
     def title(self) -> str:
@@ -97,3 +104,6 @@ class Simpli(App):
 
     def _on_draw(self) -> None:
         self.renderer.draw(self.window)
+
+    def _on_resize(self, width: int, height: int) -> None:
+        self.window.view = Mat4.from_translation(Vec3(width / 2, height / 2, 0))

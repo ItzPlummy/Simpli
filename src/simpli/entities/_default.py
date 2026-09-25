@@ -3,6 +3,7 @@ from itertools import count
 from typing import Iterable, TYPE_CHECKING, Any
 
 from simpli.components import Component
+from simpli.components.collections import ComponentCollection
 from simpli.entities._entity import Entity
 from simpli.entities._holder import EntityHolder
 
@@ -97,6 +98,12 @@ class DefaultEntityHolder(EntityHolder):
             self._components[type(component)][entity_id] = component
 
         return DefaultEntity(entity_id, self._space)
+
+    def create_collection(
+            self,
+            collection: ComponentCollection,
+    ) -> Entity:
+        return self.create(*collection())
 
     def get(
             self,

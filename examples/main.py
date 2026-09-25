@@ -1,30 +1,22 @@
 from simpli import Simpli
-from simpli.components.motion import PositionComponent, VelocityComponent
-from simpli.components.shape import CircleComponent
-from simpli.entities import Entity
+from simpli.components.collections import StaticCircleEntity, DynamicCircleEntity
+from simpli.components.motion import VelocityComponent
 from simpli.spaces import Space
 from simpli.systems import StartSystem, TickSystem
-from simpli.utils import Vector, Color
-
-entity: Entity
+from simpli.utils import Vector
 
 
 class SetupSystem(StartSystem):
     def on_start(self, space: Space) -> None:
-        global entity
-
-        entity = space.entities.create(
-            PositionComponent(
-                position=Vector.zero(),
-            ),
-            VelocityComponent(
-                velocity=Vector(50, 0),
-            ),
-            CircleComponent(
-                color=Color.black(),
-                radius=50,
-            ),
+        space.entities.create_collection(
+            StaticCircleEntity(Vector.zero(), 50)
         )
+
+        entity = space.entities.create_collection(
+            DynamicCircleEntity(Vector.zero(), 40)
+        )
+
+        entity.get(VelocityComponent).velocity += Vector(300, 120)
 
 
 class DebugSystem(TickSystem):
@@ -33,7 +25,8 @@ class DebugSystem(TickSystem):
             space: Space,
             delta: int | float,
     ) -> None:
-        print(entity.get(PositionComponent).position)
+        for entity in space.entities.by_component(VelocityComponent):
+            print(entity.get(VelocityComponent))
 
 
 class Example(Simpli):

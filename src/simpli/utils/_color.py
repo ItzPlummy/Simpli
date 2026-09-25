@@ -1,4 +1,5 @@
 import colorsys
+import random
 from typing import Self
 
 
@@ -28,6 +29,18 @@ class Color:
     @classmethod
     def oat(cls) -> Self:
         return cls(0.975, 0.945, 0.88)
+
+    @classmethod
+    def random(cls) -> Self:
+        return cls._random_with_lightness(0.5)
+
+    @classmethod
+    def random_light(cls) -> Self:
+        return cls._random_with_lightness(0.75)
+
+    @classmethod
+    def random_dark(cls) -> Self:
+        return cls._random_with_lightness(0.25)
 
     @classmethod
     def from_tuple(
@@ -167,6 +180,14 @@ class Color:
 
     def with_value(self, value: int | float) -> Self:
         return self.with_hsv(value=value)
+
+    @classmethod
+    def _random_with_lightness(
+            cls,
+            lightness: int | float,
+    ) -> Self:
+        red, green, blue = colorsys.hls_to_rgb(random.random(), lightness, 1)
+        return cls(red, green, blue)
 
     @classmethod
     def _validate_color_float(

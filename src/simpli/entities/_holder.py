@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Iterable
 
 from simpli.components import Component
+from simpli.components.collections import ComponentCollection
 from simpli.entities._entity import Entity
 
 
@@ -10,6 +11,13 @@ class EntityHolder(ABC):
     def create(
             self,
             *components: Component,
+    ) -> Entity:
+        ...
+
+    @abstractmethod
+    def create_collection(
+            self,
+            collection: ComponentCollection,
     ) -> Entity:
         ...
 

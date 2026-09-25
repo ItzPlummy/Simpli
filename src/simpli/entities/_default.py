@@ -249,6 +249,11 @@ class DefaultEntityHolder(EntityHolder):
             for component in components:
                 self._entities[component].pop(entity_id, None)
 
+            for child in self.get_children(entity_id):
+                self.detach(child.id)
+
+            self.detach(entity_id)
+
         self._destroyed.clear()
 
     def get_parent(

@@ -77,7 +77,10 @@ class DefaultCounter(Counter):
         self._tick()
 
     def _tick(self) -> None:
+        Binding.begin_scope()
         self._space.on_tick(self.time.delta)
+        Binding.end_scope()
+
         self.time.tick += 1
         self.time.simulation_time += self.time.delta
 

@@ -1,7 +1,7 @@
 from random import randint
 
 from simpli import Simpli
-from simpli.components.motion import RepulsionComponent, AttractionComponent
+from simpli.components.motion import RepulsionComponent, AttractionComponent, VelocityComponent
 from simpli.components.visual.shape import CircleComponent
 from simpli.entities import Entity
 from simpli.enums import MouseButton
@@ -9,7 +9,13 @@ from simpli.spaces import Space
 from simpli.structures import Circle
 from simpli.systems import MouseClickSystem
 from simpli.systems.motion import AirResistanceSystem, VelocitySystem, RepulsionSystem, AttractionSystem
-from simpli.utils import Vector, Supplier, resolve
+from simpli.utils import Vector, Supplier, resolve, Color
+
+_MAX_REGISTERED_VELOCITY: int | float = 500
+
+
+def _get_relative_velocity(velocity: Vector) -> int | float:
+    return min(1, velocity.length / _MAX_REGISTERED_VELOCITY)
 
 
 class CircleSpawnSystem(MouseClickSystem):
@@ -28,7 +34,15 @@ class CircleSpawnSystem(MouseClickSystem):
             )
         )
 
+        velocity: VelocityComponent = entity.get(VelocityComponent)
         circle: CircleComponent = entity.get(CircleComponent)
+
+        circle.color = Supplier(
+            lambda: Color(
+                red=_get_relative_velocity(resolve(velocity.velocity)),
+                blue=_get_relative_velocity(resolve(velocity.velocity)),
+            )
+        )
 
         entity.add(
             RepulsionComponent(

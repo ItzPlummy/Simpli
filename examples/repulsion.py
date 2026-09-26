@@ -29,7 +29,7 @@ class CircleSpawnSystem(MouseClickSystem):
         entity: Entity = space.entities.place(
             Circle(
                 position,
-                randint(20, 50),
+                randint(35, 50),
                 is_dynamic=True,
             )
         )

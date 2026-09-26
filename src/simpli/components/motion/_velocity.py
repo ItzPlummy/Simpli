@@ -1,6 +1,6 @@
 from simpli.components import Component
-from simpli.utils import Vector
+from simpli.utils import Vector, Resolvable
 
 
 class VelocityComponent(Component):
-    velocity: Vector = Vector.zero()
+    velocity: Resolvable[Vector] = Vector.zero()

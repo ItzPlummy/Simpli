@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Iterable
 
 from simpli.components import Component
 
@@ -23,6 +23,16 @@ class Entity(ABC):
     @property
     @abstractmethod
     def is_alive(self) -> bool:
+        ...
+
+    @property
+    @abstractmethod
+    def parent(self) -> Entity | None:
+        ...
+
+    @property
+    @abstractmethod
+    def children(self) -> Iterable[Entity]:
         ...
 
     @abstractmethod
@@ -62,4 +72,29 @@ class Entity(ABC):
 
     @abstractmethod
     def destroy(self) -> None:
+        ...
+
+    @abstractmethod
+    def attach_to(
+            self,
+            parent_id: int,
+    ) -> None:
+        ...
+
+    @abstractmethod
+    def detach(self) -> None:
+        ...
+
+    @abstractmethod
+    def attach_children(
+            self,
+            *children: int,
+    ) -> None:
+        ...
+
+    @abstractmethod
+    def detach_child(
+            self,
+            child_id: int,
+    ) -> None:
         ...

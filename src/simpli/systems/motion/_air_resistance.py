@@ -1,7 +1,7 @@
 from simpli.components.motion import VelocityComponent
 from simpli.spaces import Space
 from simpli.systems import TickSystem
-from simpli.utils import Resolvable, resolve, Vector
+from simpli.utils import Resolvable, resolve, Vector, Supplier
 
 
 class AirResistanceSystem(TickSystem):
@@ -21,6 +21,9 @@ class AirResistanceSystem(TickSystem):
     ) -> None:
         for entity in space.entities.by_components(VelocityComponent):
             velocity: VelocityComponent = entity.get(VelocityComponent)
+
+            if isinstance(velocity, Supplier):
+                continue
 
             resistance: int | float = resolve(self._resistance) * delta
 

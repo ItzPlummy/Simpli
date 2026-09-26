@@ -3,14 +3,15 @@ from itertools import count
 from typing import Iterable, TYPE_CHECKING, Any
 
 from simpli.components import Component
-from simpli.components.collections import ComponentCollection
 from simpli.entities._entity import Entity
 from simpli.entities._holder import EntityHolder
 
 if TYPE_CHECKING:
     from simpli.spaces import Space
+    from simpli.structures import Structure
 else:
     Space = Any
+    Structure = Any
 
 
 class DefaultEntity(Entity):
@@ -33,6 +34,14 @@ class DefaultEntity(Entity):
     @property
     def is_alive(self) -> bool:
         return self.space.entities.is_alive(self._id)
+
+    @property
+    def parent(self) -> Entity | None:
+        return self.space.entities.get_parent(self._id)
+
+    @property
+    def children(self) -> Iterable[Entity]:
+        return self.space.entities.get_children(self._id)
 
     def add(
             self,
@@ -67,6 +76,27 @@ class DefaultEntity(Entity):
     def destroy(self) -> None:
         self.space.entities.destroy(self._id)
 
+    def attach_to(
+            self,
+            parent_id: int,
+    ) -> None:
+        self.space.entities.attach_to(parent_id, self._id)
+
+    def detach(self) -> None:
+        self.space.entities.detach(self._id)
+
+    def attach_children(
+            self,
+            *children: int,
+    ) -> None:
+        self.space.entities.attach_children(self._id, *children)
+
+    def detach_child(
+            self,
+            child_id: int,
+    ) -> None:
+        self.space.entities.detach_child(self._id, child_id)
+
 
 class DefaultEntityHolder(EntityHolder):
     def __init__(
@@ -76,8 +106,13 @@ class DefaultEntityHolder(EntityHolder):
         self._space: Space = space
 
         self._ids: count[int] = count(1)
-        self._entities: dict[int, set[type[Component]]] = defaultdict[int, set[type[Component]]](set)
-        self._components: dict[type[Component], dict[int, Component]] = defaultdict[type[Component], dict[int, Component]](dict)
+
+        self._entities: dict[type[Component], dict[int, Component]] = defaultdict[type[Component], dict[int, Component]](dict)
+        self._components: dict[int, set[type[Component]]] = defaultdict[int, set[type[Component]]](set)
+
+        self._parents: dict[int, int] = {}
+        self._children: dict[int, set[int]] = defaultdict[int, set[int]](set)
+
         self._destroyed: set[int] = set()
 
     def create(
@@ -92,18 +127,18 @@ class DefaultEntityHolder(EntityHolder):
         else:
             raise RuntimeError("Unable to create entity")
 
-        self._entities[entity_id] = {type(component) for component in components}
+        self._components[entity_id] = {type(component) for component in components}
 
         for component in components:
-            self._components[type(component)][entity_id] = component
+            self._entities[type(component)][entity_id] = component
 
         return DefaultEntity(entity_id, self._space)
 
-    def create_collection(
+    def place(
             self,
-            collection: ComponentCollection,
+            structure: Structure,
     ) -> Entity:
-        return self.create(*collection())
+        return structure.place(self._space)
 
     def get(
             self,
@@ -121,7 +156,7 @@ class DefaultEntityHolder(EntityHolder):
             self,
             entity_id: int,
     ) -> bool:
-        return entity_id in self._entities
+        return entity_id in self._components
 
     def is_alive(
             self,
@@ -133,6 +168,9 @@ class DefaultEntityHolder(EntityHolder):
             self,
             entity_id: int,
     ) -> None:
+        for child in self.get_children(entity_id):
+            self._destroyed.add(child.id)
+
         self._destroyed.add(entity_id)
 
     def add_component(
@@ -140,8 +178,8 @@ class DefaultEntityHolder(EntityHolder):
             entity_id: int,
             component: Component,
     ) -> None:
-        self._entities[entity_id].add(type(component))
-        self._components[type(component)][entity_id] = component
+        self._components[entity_id].add(type(component))
+        self._entities[type(component)][entity_id] = component
 
     def get_component[T: Component](
             self,
@@ -149,7 +187,7 @@ class DefaultEntityHolder(EntityHolder):
             component: type[T],
     ) -> T:
         try:
-            return self._components[component][entity_id]
+            return self._entities[component][entity_id]
         except KeyError:
             raise RuntimeError("Unable to get component from entity")
 
@@ -159,7 +197,7 @@ class DefaultEntityHolder(EntityHolder):
             component: type[T],
     ) -> T | None:
         try:
-            return self._components[component][entity_id]
+            return self._entities[component][entity_id]
         except KeyError:
             return None
 
@@ -167,8 +205,8 @@ class DefaultEntityHolder(EntityHolder):
             self,
             entity_id: int,
     ) -> Iterable[Component]:
-        for component_type in self._entities[entity_id]:
-            component: Component | None = self._components[component_type].get(entity_id)
+        for component_type in self._components[entity_id]:
+            component: Component | None = self._entities[component_type].get(entity_id)
 
             if component is not None:
                 yield component
@@ -178,40 +216,84 @@ class DefaultEntityHolder(EntityHolder):
             entity_id: int,
             component: type[Component],
     ) -> bool:
-        return component in self._entities[entity_id]
+        return component in self._components[entity_id]
 
     def remove_component(
             self,
             entity_id: int,
             component: type[Component],
     ) -> None:
-        self._entities.pop(entity_id, None)
-        self._components[component].pop(entity_id, None)
+        self._components.pop(entity_id, None)
+        self._entities[component].pop(entity_id, None)
 
     def by_component(
             self,
             component: type[Component],
     ) -> Iterable[Entity]:
-        for entity_id in self._components[component]:
+        for entity_id in self._entities[component]:
             yield DefaultEntity(entity_id, self._space)
 
     def by_components(
             self,
             *components: type[Component],
     ) -> Iterable[Entity]:
-        entities: set[int] = set[int](self._entities.keys())
+        entities: set[int] = set[int](self._components.keys())
 
         for component in components:
-            entities &= self._components[component].keys()
+            entities &= self._entities[component].keys()
 
         for entity_id in entities:
             yield DefaultEntity(entity_id, self._space)
 
     def flush(self) -> None:
         for entity_id in self._destroyed:
-            components: set[type[Component]] = self._entities.pop(entity_id, set())
+            components: set[type[Component]] = self._components.pop(entity_id, set())
 
             for component in components:
-                self._components[component].pop(entity_id, None)
+                self._entities[component].pop(entity_id, None)
+
+            self.detach(entity_id)
 
         self._destroyed.clear()
+
+    def get_parent(
+            self,
+            entity_id: int,
+    ) -> Entity | None:
+        try:
+            return DefaultEntity(self._parents[entity_id], self._space)
+        except KeyError:
+            return None
+
+    def get_children(
+            self,
+            entity_id: int,
+    ) -> Iterable[Entity]:
+        for child_id in self._children[entity_id]:
+            yield DefaultEntity(child_id, self._space)
+
+    def attach_to(
+            self,
+            parent_id: int,
+            child_id: int,
+    ) -> None:
+        self._parents[child_id] = parent_id
+        self._children[parent_id].add(child_id)
+
+    def detach(
+            self,
+            child_id: int,
+    ) -> None:
+        parent_id: int | None = self._parents.pop(child_id, None)
+
+        if parent_id is not None:
+            self._children[parent_id].discard(child_id)
+
+    @property
+    def all(self) -> Iterable[Entity]:
+        for entity_id in self._components:
+            yield DefaultEntity(entity_id, self._space)
+
+    @property
+    def count(self) -> int:
+        return len(self._components)

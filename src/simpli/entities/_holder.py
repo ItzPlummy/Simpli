@@ -1,9 +1,13 @@
 from abc import ABC, abstractmethod
-from typing import Iterable
+from typing import Iterable, TYPE_CHECKING, Any
 
 from simpli.components import Component
-from simpli.components.collections import ComponentCollection
 from simpli.entities._entity import Entity
+
+if TYPE_CHECKING:
+    from simpli.structures import Structure
+else:
+    Structure = Any
 
 
 class EntityHolder(ABC):
@@ -15,9 +19,9 @@ class EntityHolder(ABC):
         ...
 
     @abstractmethod
-    def create_collection(
+    def place(
             self,
-            collection: ComponentCollection,
+            structure: Structure,
     ) -> Entity:
         ...
 
@@ -54,6 +58,20 @@ class EntityHolder(ABC):
             self,
             entity_id: int,
     ) -> None:
+        ...
+
+    @abstractmethod
+    def get_parent(
+            self,
+            entity_id: int,
+    ) -> Entity | None:
+        ...
+
+    @abstractmethod
+    def get_children(
+            self,
+            entity_id: int,
+    ) -> Iterable[Entity]:
         ...
 
     @abstractmethod
@@ -120,3 +138,50 @@ class EntityHolder(ABC):
     @abstractmethod
     def flush(self) -> None:
         ...
+
+    @abstractmethod
+    def attach_to(
+            self,
+            parent_id: int,
+            child_id: int,
+    ) -> None:
+        ...
+
+    @abstractmethod
+    def detach(
+            self,
+            child_id: int,
+    ) -> None:
+        ...
+
+    def attach_children(
+            self,
+            parent_id: int,
+            *children: int,
+    ) -> None:
+        for child_id in children:
+            self.attach_to(parent_id, child_id)
+
+    def detach_child(
+            self,
+            parent_id: int,
+            child_id: int,
+    ) -> None:
+        if self.get_parent(child_id) == parent_id:
+            self.detach(child_id)
+
+    @property
+    @abstractmethod
+    def all(self) -> Iterable[Entity]:
+        ...
+
+    @property
+    @abstractmethod
+    def count(self) -> int:
+        ...
+
+    def __iter__(self) -> Iterable[Entity]:
+        return self.all
+
+    def __len__(self) -> int:
+        return self.count

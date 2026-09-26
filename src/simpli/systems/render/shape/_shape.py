@@ -5,11 +5,11 @@ from pyglet.graphics import Batch, Group
 from pyglet.shapes import ShapeBase
 
 from simpli.components.motion import PositionComponent
-from simpli.components.shape import ShapeComponent
+from simpli.components.visual.shape import ShapeComponent
 from simpli.renderers import Renderer
 from simpli.spaces import Space
 from simpli.systems import FrameSystem, TickSystem
-from simpli.utils import Vector
+from simpli.utils import Vector, resolve
 
 
 class ShapeRenderSystem[T: ShapeComponent, O: ShapeBase](TickSystem, FrameSystem, ABC):
@@ -60,12 +60,12 @@ class ShapeRenderSystem[T: ShapeComponent, O: ShapeBase](TickSystem, FrameSystem
 
             position: PositionComponent = entity.get(PositionComponent)
             shape: T = entity.get(self.shape_type)
-            target: Vector = position.position + shape.offset
+            target: Vector = resolve(position.position) + resolve(shape.offset)
 
             base: O | None = self._bases.get(entity.id)
 
             if base is None:
-                base: O = self.create(shape, renderer.batch, renderer.layer(shape.layer))
+                base: O = self.create(shape, renderer.batch, renderer.layer(resolve(shape.layer)))
                 self._bases[entity.id] = base
                 self._previous_positions[entity.id] = target
             else:
@@ -99,15 +99,17 @@ class ShapeRenderSystem[T: ShapeComponent, O: ShapeBase](TickSystem, FrameSystem
             shape: T,
             renderer: Renderer,
     ) -> None:
-        rgba: tuple[int | float, ...] = tuple[int | float, ...](round(c * 255) for c in shape.color.as_tuple)
+        rgba: tuple[int | float, ...] = tuple[int | float, ...](round(color * 255) for color in resolve(shape.color).as_tuple)
 
         if base.color != rgba:
             base.color = rgba
 
-        if base.visible != shape.is_visible:
-            base.visible = shape.is_visible
+        is_visible: bool = resolve(shape.is_visible)
 
-        group: Group = renderer.layer(shape.layer)
+        if base.visible != is_visible:
+            base.visible = is_visible
+
+        group: Group = renderer.layer(resolve(shape.layer))
 
         if base.group is not group:
             base.group = group

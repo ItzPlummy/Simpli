@@ -4,7 +4,7 @@ from simpli.components.visual.shape import CircleComponent
 from simpli.entities import Entity
 from simpli.spaces import Space
 from simpli.structures._structure import Structure
-from simpli.utils import Resolvable, Vector, Color, Supplier, resolve
+from simpli.utils import Resolvable, Vector, Color, Binding, resolve
 
 
 class Circle(Structure):
@@ -58,13 +58,13 @@ class Circle(Structure):
         circle.attach_children(
             space.entities.create(
                 PositionComponent(
-                    position=Supplier(lambda: resolve(position_component.position)),
+                    position=Binding(lambda: resolve(position_component.position)),
                 ),
                 CircleComponent(
-                    radius=Supplier(lambda: resolve(circle_component.radius)),
-                    is_visible=Supplier(lambda: resolve(circle_component.is_visible)),
-                    layer=Supplier(lambda: resolve(circle_component.layer) - 1),
-                    offset=Supplier(lambda: resolve(circle_component.offset) + resolve(self._shadow_offset)),
+                    radius=Binding(lambda: resolve(circle_component.radius)),
+                    is_visible=Binding(lambda: resolve(circle_component.is_visible)),
+                    layer=Binding(lambda: resolve(circle_component.layer) - 1),
+                    offset=Binding(lambda: resolve(circle_component.offset) + resolve(self._shadow_offset)),
                     color=self._shadow_color,
                 ),
             ).id

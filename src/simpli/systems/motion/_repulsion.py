@@ -1,7 +1,7 @@
 from simpli.components.motion import RepulsionComponent, VelocityComponent, PositionComponent
 from simpli.spaces import Space
 from simpli.systems import TickSystem
-from simpli.utils import Vector, resolve, Supplier, Resolvable
+from simpli.utils import Vector, resolve, Binding, Resolvable
 
 
 class RepulsionSystem(TickSystem):
@@ -30,7 +30,7 @@ class RepulsionSystem(TickSystem):
                 position: PositionComponent = entity.get(PositionComponent)
                 velocity: VelocityComponent = entity.get(VelocityComponent)
 
-                if isinstance(velocity.velocity, Supplier):
+                if isinstance(velocity.velocity, Binding):
                     continue
 
                 distance: Vector = resolve(position.position) - resolve(source_position.position)

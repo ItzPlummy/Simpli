@@ -1,7 +1,7 @@
 from simpli.components.motion import VelocityComponent
 from simpli.spaces import Space
 from simpli.systems import TickSystem
-from simpli.utils import Resolvable, Vector, resolve, Supplier
+from simpli.utils import Resolvable, Vector, resolve, Binding
 
 
 class GravitySystem(TickSystem):
@@ -22,7 +22,7 @@ class GravitySystem(TickSystem):
         for entity in space.entities.by_component(VelocityComponent):
             velocity: VelocityComponent = entity.get(VelocityComponent)
 
-            if isinstance(velocity.velocity, Supplier):
+            if isinstance(velocity.velocity, Binding):
                 continue
 
             velocity.velocity += resolve(self._acceleration) * delta

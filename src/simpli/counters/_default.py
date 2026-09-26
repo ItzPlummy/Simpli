@@ -1,7 +1,7 @@
 from simpli.counters._counter import Counter
 from simpli.counters._time import Time
 from simpli.spaces import Space
-from simpli.utils import Resolvable, resolve, Supplier
+from simpli.utils import Resolvable, resolve, Binding
 
 
 class DefaultCounter(Counter):
@@ -29,7 +29,7 @@ class DefaultCounter(Counter):
 
     @tps.setter
     def tps(self, tps: Resolvable[int | float]) -> None:
-        self._tps = tps if isinstance(tps, Supplier) else self._resolve_positive_float(tps)
+        self._tps = tps if isinstance(tps, Binding) else self._resolve_positive_float(tps)
 
     @property
     def fps(self) -> int | float:
@@ -37,7 +37,7 @@ class DefaultCounter(Counter):
 
     @fps.setter
     def fps(self, fps: Resolvable[int | float]) -> None:
-        self._fps = fps if isinstance(fps, Supplier) else self._resolve_positive_float(fps)
+        self._fps = fps if isinstance(fps, Binding) else self._resolve_positive_float(fps)
 
     @property
     def time_scale(self) -> int | float:
@@ -45,7 +45,7 @@ class DefaultCounter(Counter):
 
     @time_scale.setter
     def time_scale(self, time_scale: Resolvable[int | float]) -> None:
-        self._time_scale = time_scale if isinstance(time_scale, Supplier) else self._resolve_positive_float(time_scale)
+        self._time_scale = time_scale if isinstance(time_scale, Binding) else self._resolve_positive_float(time_scale)
 
     @property
     def is_paused(self) -> bool:
@@ -53,7 +53,7 @@ class DefaultCounter(Counter):
 
     @is_paused.setter
     def is_paused(self, is_paused: Resolvable[bool]) -> None:
-        self._is_paused = is_paused if isinstance(is_paused, Supplier) else self._resolve_bool(is_paused)
+        self._is_paused = is_paused if isinstance(is_paused, Binding) else self._resolve_bool(is_paused)
 
     @property
     def time(self) -> Time:

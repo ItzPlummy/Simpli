@@ -6,7 +6,7 @@ from simpli.spaces import Space
 from simpli.structures import Circle
 from simpli.systems import TickSystem, MouseClickSystem
 from simpli.systems.motion import AirResistanceSystem, VelocitySystem, GravitySystem
-from simpli.utils import Vector, Supplier
+from simpli.utils import Vector, Binding
 
 _gravity_acceleration: int | float = 0
 
@@ -43,7 +43,7 @@ class Example(Simpli):
         CircleSpawnSystem(),
         GravityIncreasementSystem(),
         GravitySystem(
-            acceleration=Supplier(lambda: Vector(0, -_gravity_acceleration))
+            acceleration=Binding(lambda: Vector(0, -_gravity_acceleration))
         ),
         AirResistanceSystem(),
         VelocitySystem(),

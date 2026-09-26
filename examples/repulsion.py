@@ -9,7 +9,7 @@ from simpli.spaces import Space
 from simpli.structures import Circle
 from simpli.systems import MouseClickSystem
 from simpli.systems.motion import AirResistanceSystem, VelocitySystem, RepulsionSystem, AttractionSystem
-from simpli.utils import Vector, Supplier, resolve, Color
+from simpli.utils import Vector, Binding, resolve, Color
 
 _MAX_REGISTERED_VELOCITY: int | float = 500
 
@@ -37,7 +37,7 @@ class CircleSpawnSystem(MouseClickSystem):
         velocity: VelocityComponent = entity.get(VelocityComponent)
         circle: CircleComponent = entity.get(CircleComponent)
 
-        circle.color = Supplier(
+        circle.color = Binding(
             lambda: Color(
                 red=_get_relative_velocity(resolve(velocity.velocity)),
                 blue=_get_relative_velocity(resolve(velocity.velocity)),
@@ -46,14 +46,14 @@ class CircleSpawnSystem(MouseClickSystem):
 
         entity.add(
             RepulsionComponent(
-                max_repulsion=Supplier(lambda: resolve(circle.radius) * 150),
-                max_distance=Supplier(lambda: resolve(circle.radius) * 5),
+                max_repulsion=Binding(lambda: resolve(circle.radius) * 150),
+                max_distance=Binding(lambda: resolve(circle.radius) * 5),
             )
         )
         entity.add(
             AttractionComponent(
-                max_attraction=Supplier(lambda: resolve(circle.radius) * 10),
-                max_distance=Supplier(lambda: resolve(circle.radius) * 20),
+                max_attraction=Binding(lambda: resolve(circle.radius) * 10),
+                max_distance=Binding(lambda: resolve(circle.radius) * 20),
             )
         )
 

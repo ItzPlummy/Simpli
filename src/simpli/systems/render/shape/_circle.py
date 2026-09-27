@@ -10,13 +10,14 @@ class CircleRenderSystem(ShapeRenderSystem[CircleComponent, Circle]):
     def create(
             self,
             shape: CircleComponent,
+            scale: int | float,
             batch: Batch,
             group: Group,
     ) -> Circle:
         return Circle(
             0,
             0,
-            resolve(shape.radius),
+            resolve(shape.radius) * scale,
             batch=batch,
             group=group,
         )
@@ -26,7 +27,15 @@ class CircleRenderSystem(ShapeRenderSystem[CircleComponent, Circle]):
             base: Circle,
             shape: CircleComponent,
     ) -> None:
-        radius: int | float = resolve(shape.radius)
+        pass
+
+    def apply_scale(
+            self,
+            base: Circle,
+            shape: CircleComponent,
+            scale: int | float,
+    ) -> None:
+        radius: int | float = resolve(shape.radius) * scale
 
         if base.radius != radius:
             base.radius = radius

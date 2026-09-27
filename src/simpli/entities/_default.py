@@ -223,7 +223,7 @@ class DefaultEntityHolder(EntityHolder):
             entity_id: int,
             component: type[Component],
     ) -> None:
-        self._components.pop(entity_id, None)
+        self._components.get(entity_id, set()).discard(component)
         self._entities[component].pop(entity_id, None)
 
     def by_component(

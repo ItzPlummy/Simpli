@@ -5,6 +5,7 @@ from simpli.enums import MouseButton
 from simpli.spaces import Space
 from simpli.structures import Circle
 from simpli.systems import TickSystem, MouseClickSystem
+from simpli.systems.effect import BouncyAppearanceEffectSystem
 from simpli.systems.motion import AirResistanceSystem, VelocitySystem, GravitySystem
 from simpli.utils import Vector, Binding
 
@@ -47,6 +48,7 @@ class Example(Simpli):
         ),
         AirResistanceSystem(),
         VelocitySystem(),
+        BouncyAppearanceEffectSystem(),
     ]
 
 

@@ -4,6 +4,7 @@ from typing import ClassVar, get_args, get_origin
 from pyglet.graphics import Batch, Group
 from pyglet.shapes import ShapeBase
 
+from simpli.components.effect import ScaleEffectComponent
 from simpli.components.motion import PositionComponent
 from simpli.components.visual.shape import ShapeComponent
 from simpli.renderers import Renderer
@@ -16,6 +17,7 @@ class ShapeRenderSystem[T: ShapeComponent, O: ShapeBase](TickSystem, FrameSystem
     shape_type: ClassVar[type[ShapeComponent]]
 
     def __init_subclass__(cls, **kwargs) -> None:
+        # noinspection PyTypeChecker
         super().__init_subclass__(**kwargs)
 
         for base in cls.__dict__.get("__orig_bases__", ()):
@@ -29,11 +31,15 @@ class ShapeRenderSystem[T: ShapeComponent, O: ShapeBase](TickSystem, FrameSystem
         self._bases: dict[int, O] = {}
         self._previous_positions: dict[int, Vector] = {}
         self._current_positions: dict[int, Vector] = {}
+        self._shapes: dict[int, T] = {}
+        self._previous_scales: dict[int, int | float] = {}
+        self._current_scales: dict[int, int | float] = {}
 
     @abstractmethod
     def create(
             self,
             shape: T,
+            scale: int | float,
             batch: Batch,
             group: Group,
     ) -> O:
@@ -44,6 +50,15 @@ class ShapeRenderSystem[T: ShapeComponent, O: ShapeBase](TickSystem, FrameSystem
             self,
             base: O,
             shape: T,
+    ) -> None:
+        ...
+
+    @abstractmethod
+    def apply_scale(
+            self,
+            base: O,
+            shape: T,
+            scale: int | float,
     ) -> None:
         ...
 
@@ -62,23 +77,32 @@ class ShapeRenderSystem[T: ShapeComponent, O: ShapeBase](TickSystem, FrameSystem
             shape: T = entity.get(self.shape_type)
             target: Vector = resolve(position.position) + resolve(shape.offset)
 
+            scale_effect: ScaleEffectComponent | None = entity.find(ScaleEffectComponent)
+            scale: int | float = 1 if scale_effect is None else resolve(scale_effect.scale)
+
             base: O | None = self._bases.get(entity.id)
 
             if base is None:
-                base: O = self.create(shape, renderer.batch, renderer.layer(resolve(shape.layer)))
+                base: O = self.create(shape, scale, renderer.batch, renderer.layer(resolve(shape.layer)))
                 self._bases[entity.id] = base
                 self._previous_positions[entity.id] = target
+                self._previous_scales[entity.id] = scale
             else:
                 self._previous_positions[entity.id] = self._current_positions[entity.id]
+                self._previous_scales[entity.id] = self._current_scales[entity.id]
 
             self._current_positions[entity.id] = target
+            self._current_scales[entity.id] = scale
+            self._shapes[entity.id] = shape
 
             self._apply_common(base, shape, renderer)
             self.update(base, shape)
+            self.apply_scale(base, shape, scale)
 
         for entity_id in self._bases.keys() - seen:
             self._bases.pop(entity_id).delete()
             del self._previous_positions[entity_id], self._current_positions[entity_id]
+            del self._shapes[entity_id], self._previous_scales[entity_id], self._current_scales[entity_id]
 
     def on_frame(
             self,
@@ -92,6 +116,11 @@ class ShapeRenderSystem[T: ShapeComponent, O: ShapeBase](TickSystem, FrameSystem
 
             if base.position != position:
                 base.position = position
+
+            previous_scale, current_scale = self._previous_scales[entity_id], self._current_scales[entity_id]
+
+            if previous_scale != current_scale:
+                self.apply_scale(base, self._shapes[entity_id], previous_scale + (current_scale - previous_scale) * alpha)
 
     @staticmethod
     def _apply_common(
